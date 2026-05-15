@@ -1,17 +1,10 @@
-# mobile
+# Project Akhir TCC - PaluGada
 
-A new Flutter project.
+## Project Overview
 
-## Getting Started
+Proyek ini terdiri dari dua bagian utama, yaitu **Mobile** dan **Web**.
 
-This project is a starting point for a Flutter application.
+## Branching
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Mobile:** Berada di branch `mobile`
+- **Web:** Berada di branch `web`
