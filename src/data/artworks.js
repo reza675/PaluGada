@@ -1,0 +1,143 @@
+// Mock data: artworks table
+// FK: artist_id → users.id, category_id → categories.id, verified_by → users.id
+
+const artworks = [
+  {
+    id: 1,
+    artist_id: 1, // Budi Santoso
+    category_id: 1, // Lukisan
+    title: 'Matahari Terbenam di Parangtritis',
+    description: 'Lukisan cat minyak yang menggambarkan keindahan sunset di pantai Parangtritis, Yogyakarta. Warna-warna hangat yang menyatu dengan ombak menciptakan suasana tenang dan damai.',
+    medium: 'Cat Minyak di Kanvas',
+    dimensions: '120 x 80 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art1/800/600',
+    starting_price: 15000000,
+    status: 'verified',
+    verified_by: 4, // Dr. Rina
+    verified_at: '2025-06-15T10:00:00Z',
+    created_at: '2025-06-01T08:00:00Z',
+    updated_at: '2025-06-15T10:00:00Z',
+  },
+  {
+    id: 2,
+    artist_id: 1, // Budi Santoso
+    category_id: 1,
+    title: 'Sawah Terasering Ubud',
+    description: 'Pemandangan sawah terasering khas Ubud Bali yang hijau membentang, dengan latar belakang gunung dan langit biru.',
+    medium: 'Akrilik di Kanvas',
+    dimensions: '100 x 70 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art2/800/600',
+    starting_price: 12000000,
+    status: 'verified',
+    verified_by: 4,
+    verified_at: '2025-07-01T14:00:00Z',
+    created_at: '2025-06-20T09:00:00Z',
+    updated_at: '2025-07-01T14:00:00Z',
+  },
+  {
+    id: 3,
+    artist_id: 2, // Sari Dewi
+    category_id: 1,
+    title: 'Ombak Biru Nusantara',
+    description: 'Abstraksi dari gelombang laut Indonesia dengan palet biru dan turquoise. Menangkap energi dan keindahan samudra.',
+    medium: 'Cat Minyak di Kanvas',
+    dimensions: '150 x 100 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art3/800/600',
+    starting_price: 25000000,
+    status: 'verified',
+    verified_by: 5, // Maya
+    verified_at: '2025-07-10T11:00:00Z',
+    created_at: '2025-07-05T10:00:00Z',
+    updated_at: '2025-07-10T11:00:00Z',
+  },
+  {
+    id: 4,
+    artist_id: 2,
+    category_id: 4, // Digital Art
+    title: 'Mimpi Digital',
+    description: 'Karya seni digital yang menggambarkan dunia mimpi futuristik dengan elemen budaya Indonesia.',
+    medium: 'Digital Painting',
+    dimensions: '4000 x 3000 px',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art4/800/600',
+    starting_price: 8000000,
+    status: 'pending',
+    verified_by: null,
+    verified_at: null,
+    created_at: '2025-08-01T08:00:00Z',
+    updated_at: '2025-08-01T08:00:00Z',
+  },
+  {
+    id: 5,
+    artist_id: 3, // Agus Pratama
+    category_id: 2, // Patung
+    title: 'Dewi Sri Modern',
+    description: 'Patung kontemporer yang menginterpretasikan Dewi Sri dengan gaya modern minimalis menggunakan perunggu.',
+    medium: 'Perunggu',
+    dimensions: '45 x 25 x 25 cm',
+    year_created: 2024,
+    image_url: 'https://picsum.photos/seed/art5/800/600',
+    starting_price: 35000000,
+    status: 'verified',
+    verified_by: 4,
+    verified_at: '2025-05-20T09:00:00Z',
+    created_at: '2025-05-10T08:00:00Z',
+    updated_at: '2025-05-20T09:00:00Z',
+  },
+  {
+    id: 6,
+    artist_id: 3,
+    category_id: 5, // Mixed Media
+    title: 'Harmoni Nusantara',
+    description: 'Karya mixed media menggabungkan kain batik, kayu jati, dan cat akrilik. Merepresentasikan keragaman budaya Indonesia.',
+    medium: 'Mixed Media (Batik, Kayu, Akrilik)',
+    dimensions: '90 x 60 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art6/800/600',
+    starting_price: 18000000,
+    status: 'pending',
+    verified_by: null,
+    verified_at: null,
+    created_at: '2025-08-05T11:00:00Z',
+    updated_at: '2025-08-05T11:00:00Z',
+  },
+  {
+    id: 7,
+    artist_id: 1,
+    category_id: 6, // Sketsa
+    title: 'Potret Pasar Tradisional',
+    description: 'Sketsa pensil detail menggambarkan kehidupan sehari-hari di pasar tradisional Jawa.',
+    medium: 'Pensil di Kertas',
+    dimensions: '50 x 35 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art7/800/600',
+    starting_price: 5000000,
+    status: 'rejected',
+    verified_by: 4,
+    verified_at: '2025-08-10T10:00:00Z',
+    created_at: '2025-08-08T08:00:00Z',
+    updated_at: '2025-08-10T10:00:00Z',
+  },
+  {
+    id: 8,
+    artist_id: 2,
+    category_id: 3, // Fotografi
+    title: 'Cahaya Pagi Bromo',
+    description: 'Fotografi landscape menangkap momen golden hour di kawasan Gunung Bromo dengan kabut yang menyelimuti.',
+    medium: 'Cetak Fine Art',
+    dimensions: '60 x 40 cm',
+    year_created: 2025,
+    image_url: 'https://picsum.photos/seed/art8/800/600',
+    starting_price: 7500000,
+    status: 'pending',
+    verified_by: null,
+    verified_at: null,
+    created_at: '2025-08-12T09:00:00Z',
+    updated_at: '2025-08-12T09:00:00Z',
+  },
+];
+
+export default artworks;
