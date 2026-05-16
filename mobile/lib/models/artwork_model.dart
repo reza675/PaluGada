@@ -36,24 +36,39 @@ class ArtworkModel {
   }) : createdAt = createdAt ?? DateTime.now();
 
   factory ArtworkModel.fromJson(Map<String, dynamic> json) {
+    double toDouble(dynamic value) {
+      if (value is num) return value.toDouble();
+      return double.tryParse(value?.toString() ?? '') ?? 0;
+    }
+
+    DateTime? parseDate(dynamic value) {
+      if (value == null) return null;
+      try {
+        return DateTime.parse(value.toString());
+      } catch (_) {
+        return null;
+      }
+    }
+
+    String mapStatus(dynamic value) {
+      final v = value?.toString();
+      return v == 'VERIFIED' ? 'verified' : 'pending';
+    }
+
     return ArtworkModel(
       id: json['id'] ?? '',
-      title: json['title'] ?? '',
+      title: json['nama_karya'] ?? '',
       artist: json['artist'] ?? '',
-      description: json['description'] ?? '',
+      description: json['deskripsi'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
-      category: json['category'] ?? 'Painting',
-      startingPrice: (json['startingPrice'] ?? 0).toDouble(),
+      category: json['katalog'] ?? 'Painting',
+      startingPrice: toDouble(json['min_bid_ammount']),
       currentPrice: (json['currentPrice'] ?? 0).toDouble(),
       highestBid: (json['highestBid'] ?? 0).toDouble(),
       lowestBid: (json['lowestBid'] ?? 0).toDouble(),
-      status: json['status'] ?? 'verified',
-      createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'])
-          : DateTime.now(),
-      biddingEndTime: json['biddingEndTime'] != null
-          ? DateTime.parse(json['biddingEndTime'])
-          : null,
+      status: mapStatus(json['verification_status']),
+      createdAt: parseDate(json['createdAt']) ?? DateTime.now(),
+      biddingEndTime: parseDate(json['close_bid_time']),
       totalBids: json['totalBids'] ?? 0,
       lastBidderName: json['lastBidderName'] ?? '',
       isInWatchlist: json['isInWatchlist'] ?? false,
@@ -61,20 +76,21 @@ class ArtworkModel {
   }
 
   Map<String, dynamic> toJson() {
+    final verificationStatus = status == 'verified' ? 'VERIFIED' : 'UNVERIFIED';
     return {
       'id': id,
-      'title': title,
+      'nama_karya': title,
       'artist': artist,
-      'description': description,
+      'deskripsi': description,
       'imageUrl': imageUrl,
-      'category': category,
-      'startingPrice': startingPrice,
+      'katalog': category,
+      'min_bid_ammount': startingPrice,
       'currentPrice': currentPrice,
       'highestBid': highestBid,
       'lowestBid': lowestBid,
-      'status': status,
+      'verification_status': verificationStatus,
       'createdAt': createdAt.toIso8601String(),
-      'biddingEndTime': biddingEndTime?.toIso8601String(),
+      'close_bid_time': biddingEndTime?.toIso8601String(),
       'totalBids': totalBids,
       'lastBidderName': lastBidderName,
       'isInWatchlist': isInWatchlist,

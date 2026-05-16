@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import '../models/user_model.dart';
 import '../routes/app_routes.dart';
+import '../services/api_service.dart';
 
 class AuthController extends GetxController {
+  final ApiService _api = Get.find<ApiService>();
   final Rx<UserModel?> currentUser = Rx<UserModel?>(null);
   final isLoading = false.obs;
   final isLoggedIn = false.obs;
@@ -12,36 +14,67 @@ class AuthController extends GetxController {
     obscurePassword.value = !obscurePassword.value;
   }
 
-  /// Mock login – ganti dengan real API / Firebase Auth nanti
+  /// Login via API
   Future<void> login(String email, String password) async {
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 1));
-    currentUser.value = UserModel(
-      id: 'usr_001',
-      name: 'Reza',
-      email: email,
-      phone: '+62 812 3456 7890',
-      role: 'collector',
-    );
-    isLoggedIn.value = true;
-    isLoading.value = false;
-    Get.offAllNamed(AppRoutes.home);
+    try {
+      final response = await _api.post(
+        '/user/login',
+        body: {
+          'email': email,
+          'password': password,
+        },
+      );
+      final token = response is Map ? response['token']?.toString() : null;
+      if (token == null || token.isEmpty) {
+        throw Exception('Token login tidak ditemukan');
+      }
+      await _api.setToken(token);
+
+      currentUser.value = UserModel(
+        id: 'usr_local',
+        name: email.split('@').first,
+        email: email,
+        role: 'collector',
+      );
+      isLoggedIn.value = true;
+      Get.offAllNamed(AppRoutes.home);
+    } catch (error) {
+      Get.snackbar('Login gagal', error.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  /// Mock register
-  Future<void> register(String name, String email, String password, String phone) async {
+  /// Register via API
+  Future<void> register(
+    String username,
+    String name,
+    String email,
+    String password,
+    String phone,
+  ) async {
     isLoading.value = true;
-    await Future.delayed(const Duration(seconds: 1));
-    currentUser.value = UserModel(
-      id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
-      name: name,
-      email: email,
-      phone: phone,
-      role: 'collector',
-    );
-    isLoggedIn.value = true;
-    isLoading.value = false;
-    Get.offAllNamed(AppRoutes.home);
+    try {
+      await _api.post(
+        '/user/register',
+        body: {
+          'username': username,
+          'full_name': name,
+          'email': email,
+          'phone_number': phone,
+          'password': password,
+          'role': 'KOLEKTOR',
+        },
+      );
+      isLoggedIn.value = false;
+      Get.offAllNamed(AppRoutes.login);
+      Get.snackbar('Registrasi berhasil', 'Silakan login untuk melanjutkan');
+    } catch (error) {
+      Get.snackbar('Registrasi gagal', error.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   /// Update account

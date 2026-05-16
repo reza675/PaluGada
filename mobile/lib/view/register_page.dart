@@ -8,6 +8,7 @@ class RegisterPage extends StatelessWidget {
   RegisterPage({super.key});
 
   final AuthController authController = Get.find<AuthController>();
+  final _usernameCtrl = TextEditingController();
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _phoneCtrl = TextEditingController();
@@ -121,6 +122,20 @@ class RegisterPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         TextFormField(
+                          controller: _usernameCtrl,
+                          decoration: const InputDecoration(
+                            labelText: 'Username',
+                            prefixIcon: Icon(
+                              Icons.alternate_email,
+                              color: AppColors.primaryLight,
+                            ),
+                          ),
+                          validator: (v) => v == null || v.isEmpty
+                              ? 'Username wajib diisi'
+                              : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
                           controller: _emailCtrl,
                           keyboardType: TextInputType.emailAddress,
                           decoration: const InputDecoration(
@@ -216,6 +231,7 @@ class RegisterPage extends StatelessWidget {
                                   : () {
                                       if (_formKey.currentState!.validate()) {
                                         authController.register(
+                                          _usernameCtrl.text,
                                           _nameCtrl.text,
                                           _emailCtrl.text,
                                           _passwordCtrl.text,
