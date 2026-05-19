@@ -100,7 +100,7 @@ class DetailPage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            art.category,
+                            art.katalog,
                             style: GoogleFonts.outfit(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -110,7 +110,7 @@ class DetailPage extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          art.title,
+                          art.nama_karya,
                           style: GoogleFonts.playfairDisplay(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -118,7 +118,7 @@ class DetailPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'oleh ${art.artist}',
+                          'Artist: ${art.artistId}',
                           style: GoogleFonts.outfit(
                             fontSize: 14,
                             color: Colors.white.withValues(alpha: 0.8),
@@ -138,8 +138,7 @@ class DetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _priceCard(art),
-                  const SizedBox(height: 20),
+                  _priceCard(art), const SizedBox(height: 20),
                   if (art.highestBid > 0) ...[
                     _priceRange(art),
                     const SizedBox(height: 20),
@@ -148,6 +147,37 @@ class DetailPage extends StatelessWidget {
                     _lastBidder(art),
                     const SizedBox(height: 20),
                   ],
+
+                  // Status badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: art.verification_status == 'VERIFIED'
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.warning.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: art.verification_status == 'VERIFIED'
+                            ? AppColors.success
+                            : AppColors.warning,
+                      ),
+                    ),
+                    child: Text(
+                      art.verification_status,
+                      style: GoogleFonts.outfit(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: art.verification_status == 'VERIFIED'
+                            ? AppColors.success
+                            : AppColors.warning,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
                   Text(
                     'Deskripsi',
                     style: GoogleFonts.playfairDisplay(
@@ -158,30 +188,71 @@ class DetailPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    art.description,
+                    art.deskripsi.isNotEmpty
+                        ? art.deskripsi
+                        : 'Tidak ada deskripsi',
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       color: AppColors.textSecondary,
                       height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  if (art.status == 'bidding')
-                    OutlinedButton.icon(
-                      onPressed: () =>
-                          Get.toNamed(AppRoutes.bidding, arguments: art.id),
-                      icon: const Icon(Icons.history),
-                      label: Text(
-                        'Lihat Riwayat Bid (${art.totalBids})',
-                        style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        minimumSize: const Size(double.infinity, 52),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
+
+                  if (art.tags != null && art.tags!.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      'Tags',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 6,
+                      children: art.tags!
+                          .split(',')
+                          .map(
+                            (t) => Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceVariant,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                t.trim(),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ],
+
+                  const SizedBox(height: 20),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        Get.toNamed(AppRoutes.bidding, arguments: art.id),
+                    icon: const Icon(Icons.history),
+                    label: Text(
+                      'Lihat Riwayat Bid',
+                      style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+                    ),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(double.infinity, 52),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -189,51 +260,49 @@ class DetailPage extends StatelessWidget {
           ),
         ],
       ),
-      bottomSheet: art.status == 'bidding'
-          ? Container(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.primaryDark.withValues(alpha: 0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, -5),
-                  ),
-                ],
+      bottomSheet: Container(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primaryDark.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
+            ),
+          ],
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            onPressed: () =>
+                _showBidDialog(context, art.id, art.min_bid_ammount),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
               ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: () =>
-                      _showBidDialog(context, art.id, art.currentPrice),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    elevation: 4,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.gavel, color: Colors.white),
-                      const SizedBox(width: 10),
-                      Text(
-                        'Pasang Bid',
-                        style: GoogleFonts.outfit(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+              elevation: 4,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.gavel, color: Colors.white),
+                const SizedBox(width: 10),
+                Text(
+                  'Pasang Bid',
+                  style: GoogleFonts.outfit(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white,
                   ),
                 ),
-              ),
-            )
-          : null,
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -295,7 +364,7 @@ class DetailPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Harga Saat Ini',
+                  'Min Bid',
                   style: GoogleFonts.outfit(
                     fontSize: 12,
                     color: Colors.white.withValues(alpha: 0.7),
@@ -303,7 +372,7 @@ class DetailPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Rp ${_fmt(art.currentPrice)}',
+                  'Rp ${_fmt(art.min_bid_ammount.toDouble())}',
                   style: GoogleFonts.outfit(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -312,7 +381,7 @@ class DetailPage extends StatelessWidget {
                 ),
               ],
             ),
-            if (art.status == 'bidding')
+            if (art.close_bid_time != null)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 14,
@@ -327,7 +396,7 @@ class DetailPage extends StatelessWidget {
                     const Icon(Icons.timer, color: Colors.white, size: 18),
                     const SizedBox(height: 2),
                     Text(
-                      _timeLeft(art.biddingEndTime),
+                      _timeLeft(art.close_bid_time),
                       style: GoogleFonts.outfit(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
@@ -349,14 +418,14 @@ class DetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Harga Awal',
+                    'Katalog',
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
                   Text(
-                    'Rp ${_fmt(art.startingPrice)}',
+                    art.katalog,
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -371,14 +440,14 @@ class DetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Total Bid',
+                    'Status',
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       color: Colors.white.withValues(alpha: 0.6),
                     ),
                   ),
                   Text(
-                    '${art.totalBids}',
+                    art.verification_status,
                     style: GoogleFonts.outfit(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -529,7 +598,7 @@ class DetailPage extends StatelessWidget {
     ),
   );
 
-  void _showBidDialog(BuildContext ctx, String artId, double curPrice) {
+  void _showBidDialog(BuildContext ctx, String artId, int minBid) {
     final ctrl = TextEditingController();
     final bidCtrl = Get.find<BiddingController>();
     Get.bottomSheet(
@@ -564,18 +633,10 @@ class DetailPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              'Harga saat ini: Rp ${_fmt(curPrice)}',
+              'Min bid: Rp ${_fmt(minBid.toDouble())}',
               style: GoogleFonts.outfit(
                 fontSize: 13,
                 color: AppColors.textHint,
-              ),
-            ),
-            Text(
-              'Minimum bid: Rp ${_fmt(curPrice + 100000)}',
-              style: GoogleFonts.outfit(
-                fontSize: 13,
-                color: AppColors.accentDark,
-                fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 20),
@@ -588,7 +649,7 @@ class DetailPage extends StatelessWidget {
                   Icons.attach_money,
                   color: AppColors.primaryLight,
                 ),
-                hintText: '${(curPrice + 100000).toInt()}',
+                hintText: '${minBid + 100000}',
               ),
             ),
             const SizedBox(height: 24),
@@ -597,14 +658,14 @@ class DetailPage extends StatelessWidget {
               height: 56,
               child: ElevatedButton(
                 onPressed: () {
-                  final amt = double.tryParse(ctrl.text) ?? 0;
-                  if (amt > curPrice) {
-                    bidCtrl.placeBid(artId, amt, 'Reza Collector');
+                  final amt = int.tryParse(ctrl.text) ?? 0;
+                  if (amt >= minBid) {
+                    bidCtrl.placeBid(artId, amt);
                     Get.back();
                   } else {
                     Get.snackbar(
                       'Bid Tidak Valid',
-                      'Jumlah bid harus lebih besar dari harga saat ini',
+                      'Jumlah bid harus >= min bid',
                       backgroundColor: AppColors.error,
                       colorText: Colors.white,
                     );

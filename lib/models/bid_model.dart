@@ -1,29 +1,35 @@
+/// BidModel — matched to Prisma Bid schema
 class BidModel {
   final String id;
-  final String artworkId;
-  final String bidderId;
+  final String artworksId;
+  final int amount;
+  final String bidById;
   final String bidderName;
-  final double amount;
-  final DateTime bidTime;
+  final String status;
+  final DateTime timestamp;
 
   BidModel({
     required this.id,
-    required this.artworkId,
-    required this.bidderId,
-    required this.bidderName,
+    required this.artworksId,
     required this.amount,
-    DateTime? bidTime,
-  }) : bidTime = bidTime ?? DateTime.now();
+    required this.bidById,
+    this.bidderName = '',
+    this.status = 'OPEN',
+    DateTime? timestamp,
+  }) : timestamp = timestamp ?? DateTime.now();
 
   factory BidModel.fromJson(Map<String, dynamic> json) {
     return BidModel(
       id: json['id'] ?? '',
-      artworkId: json['artworkId'] ?? '',
-      bidderId: json['bidderId'] ?? '',
-      bidderName: json['bidderName'] ?? '',
-      amount: (json['amount'] ?? 0).toDouble(),
-      bidTime: json['bidTime'] != null
-          ? DateTime.parse(json['bidTime'])
+      artworksId: json['artworksId'] ?? '',
+      amount: json['amount'] is int
+          ? json['amount']
+          : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+      bidById: json['bidById'] ?? '',
+      bidderName: json['bidderName'] ?? json['bidById'] ?? '',
+      status: json['status'] ?? 'OPEN',
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'])
           : DateTime.now(),
     );
   }
@@ -31,11 +37,12 @@ class BidModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'artworkId': artworkId,
-      'bidderId': bidderId,
-      'bidderName': bidderName,
+      'artworksId': artworksId,
       'amount': amount,
-      'bidTime': bidTime.toIso8601String(),
+      'bidById': bidById,
+      'bidderName': bidderName,
+      'status': status,
+      'timestamp': timestamp.toIso8601String(),
     };
   }
 }

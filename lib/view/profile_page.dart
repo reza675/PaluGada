@@ -62,7 +62,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 14),
                     Text(
-                      user?.name ?? 'Kolektor',
+                      user?.username ?? 'Kolektor',
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -88,7 +88,7 @@ class ProfilePage extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                       ),
                       child: Text(
-                        'Kolektor',
+                        user?.role ?? 'KOLEKTOR',
                         style: GoogleFonts.outfit(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -125,8 +125,13 @@ class ProfilePage extends StatelessWidget {
                       Icons.phone_outlined,
                       'No. Telepon',
                       () {},
-                      subtitle: user?.phone ?? '-',
-                      showChevron: false,
+                      subtitle: user?.phone_number ?? '-',
+                    ),
+                    _menu(
+                      Icons.person_outline,
+                      'Username',
+                      () {},
+                      subtitle: user?.username ?? '-',
                     ),
                     const Divider(height: 30),
                     Text(
@@ -142,13 +147,17 @@ class ProfilePage extends StatelessWidget {
                       Icons.info_outline,
                       'Tentang Aplikasi',
                       () => _showAbout(),
-                      showChevron: false,
                     ),
                     _menu(
                       Icons.logout,
                       'Keluar',
                       () => _confirmLogout(authCtrl),
-                      showChevron: false,
+                    ),
+                    _menu(
+                      Icons.delete,
+                      'Hapus Akun',
+                      () => _confirmDeleteAccount(authCtrl),
+                      isDestructive: true,
                     ),
                   ],
                 ),
@@ -166,7 +175,6 @@ class ProfilePage extends StatelessWidget {
     VoidCallback onTap, {
     String? subtitle,
     bool isDestructive = false,
-    bool showChevron = true,
   }) {
     final color = isDestructive ? AppColors.error : AppColors.textPrimary;
     return GestureDetector(
@@ -207,7 +215,7 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
             ),
-            if (showChevron)
+            if (!isDestructive)
               const Icon(
                 Icons.chevron_right,
                 color: AppColors.textHint,
@@ -219,102 +227,110 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  void _confirmLogout(AuthController ctrl) {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        backgroundColor: AppColors.surface,
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Keluar',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                'Apakah Anda yakin ingin keluar?',
-                style: GoogleFonts.outfit(
-                  fontSize: 15,
-                  color: AppColors.textSecondary,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
+  void _showAbout() {
+    Get.defaultDialog(
+      title: 'Pasar Lelang Barang Seni',
+      titleStyle: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+      middleText:
+          'Aplikasi lelang karya seni online.\n\nTemukan, tawar, dan menangkan karya seni favoritmu dengan mudah.',
+      textConfirm: 'OK',
+      confirmTextColor: Colors.white,
+      buttonColor: AppColors.primary,
+      onConfirm: () => Get.back(),
+    );
+  }
 
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => Get.back(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.surfaceVariant,
-                        foregroundColor: AppColors.textPrimary,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: Text(
-                        'Batal',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.back();
-                        ctrl.logout();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.error,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                      ),
-                      child: Text(
-                        'Keluar',
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+  void _confirmLogout(AuthController ctrl) {
+    Get.defaultDialog(
+      title: 'Keluar',
+      titleStyle: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
+      middleText: 'Apakah Anda yakin ingin keluar?',
+      radius: 8,
+      cancel: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[200],
+          elevation: 0,
+          minimumSize: const Size(110, 42),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () => Get.back(),
+        child: Text(
+          'Batal',
+          style: GoogleFonts.outfit(
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          elevation: 0,
+          minimumSize: const Size(110, 42),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () => ctrl.logout(),
+        child: Text(
+          'Keluar',
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
     );
   }
 
-  void _showAbout() {
+  void _confirmDeleteAccount(AuthController ctrl) {
     Get.defaultDialog(
-      title: 'Palu Gada',
+      title: 'Hapus Akun',
       titleStyle: GoogleFonts.playfairDisplay(fontWeight: FontWeight.w600),
-      middleText:
-          'Aplikasi lelang karya seni online.\n\n Aplikasi ini dibuat untuk memudahkan kolektor dalam menemukan karya seni terbaik dan terpercaya.',
-      textConfirm: 'OK',
-      confirmTextColor: Colors.white,
-      buttonColor: AppColors.primary,
-      onConfirm: () => Get.back(),
+      middleText: 'Apakah Anda yakin ingin menghapus akun?',
+      radius: 8,
+      cancel: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey[200],
+          elevation: 0,
+          minimumSize: const Size(110, 42),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () => Get.back(),
+        child: Text(
+          'Batal',
+          style: GoogleFonts.outfit(
+            color: Colors.black87,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.error,
+          elevation: 0,
+          minimumSize: const Size(110, 42),
+          padding: EdgeInsets.zero,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        onPressed: () => ctrl.deleteAccount(),
+        child: Text(
+          'Hapus',
+          style: GoogleFonts.outfit(
+            color: Colors.white,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
     );
   }
 }

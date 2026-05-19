@@ -1,39 +1,43 @@
 class ArtworkModel {
   final String id;
-  final String title;
-  final String artist;
-  final String description;
+  final String nama_karya;
+  final String artistId;
+  final String? ownerId;
+  final String deskripsi;
   final String imageUrl;
-  final String category;
-  final double startingPrice;
+  final String katalog;
+  final String? tags;
+  final int min_bid_ammount;
   final double currentPrice;
   final double highestBid;
   final double lowestBid;
-  final String status; // 'verified', 'pending', 'bidding', 'sold'
-  final DateTime createdAt;
-  final DateTime? biddingEndTime;
+  final String verification_status; // 'VERIFIED', 'UNVERIFIED'
+  final DateTime? open_bid_time;
+  final DateTime? close_bid_time;
   final int totalBids;
   final String lastBidderName;
   final bool isInWatchlist;
 
   ArtworkModel({
     required this.id,
-    required this.title,
-    required this.artist,
-    this.description = '',
+    required this.nama_karya,
+    this.artistId = '',
+    this.ownerId,
+    this.deskripsi = '',
     this.imageUrl = '',
-    this.category = 'Painting',
-    this.startingPrice = 0,
+    this.katalog = 'Lukisan',
+    this.tags,
+    this.min_bid_ammount = 0,
     this.currentPrice = 0,
     this.highestBid = 0,
     this.lowestBid = 0,
-    this.status = 'verified',
-    DateTime? createdAt,
-    this.biddingEndTime,
+    this.verification_status = 'UNVERIFIED',
+    this.open_bid_time,
+    this.close_bid_time,
     this.totalBids = 0,
     this.lastBidderName = '',
     this.isInWatchlist = false,
-  }) : createdAt = createdAt ?? DateTime.now();
+  });
 
   factory ArtworkModel.fromJson(Map<String, dynamic> json) {
     double toDouble(dynamic value) {
@@ -43,32 +47,28 @@ class ArtworkModel {
 
     DateTime? parseDate(dynamic value) {
       if (value == null) return null;
-      try {
-        return DateTime.parse(value.toString());
-      } catch (_) {
-        return null;
-      }
-    }
-
-    String mapStatus(dynamic value) {
-      final v = value?.toString();
-      return v == 'VERIFIED' ? 'verified' : 'pending';
+      try { return DateTime.parse(value.toString()); }
+      catch (_) { return null; }
     }
 
     return ArtworkModel(
       id: json['id'] ?? '',
-      title: json['nama_karya'] ?? '',
-      artist: json['artist'] ?? '',
-      description: json['deskripsi'] ?? '',
+      nama_karya: json['nama_karya'] ?? '',
+      artistId: json['artistId'] ?? '',
+      ownerId: json['ownerId'],
+      deskripsi: json['deskripsi'] ?? '',
       imageUrl: json['imageUrl'] ?? '',
-      category: json['katalog'] ?? 'Painting',
-      startingPrice: toDouble(json['min_bid_ammount']),
-      currentPrice: (json['currentPrice'] ?? 0).toDouble(),
-      highestBid: (json['highestBid'] ?? 0).toDouble(),
-      lowestBid: (json['lowestBid'] ?? 0).toDouble(),
-      status: mapStatus(json['verification_status']),
-      createdAt: parseDate(json['createdAt']) ?? DateTime.now(),
-      biddingEndTime: parseDate(json['close_bid_time']),
+      katalog: json['katalog'] ?? 'Lukisan',
+      tags: json['tags'],
+      min_bid_ammount: json['min_bid_ammount'] is int
+          ? json['min_bid_ammount']
+          : int.tryParse(json['min_bid_ammount']?.toString() ?? '0') ?? 0,
+      currentPrice: toDouble(json['currentPrice']),
+      highestBid: toDouble(json['highestBid']),
+      lowestBid: toDouble(json['lowestBid']),
+      verification_status: json['verification_status'] ?? 'UNVERIFIED',
+      open_bid_time: parseDate(json['open_bid_time']),
+      close_bid_time: parseDate(json['close_bid_time']),
       totalBids: json['totalBids'] ?? 0,
       lastBidderName: json['lastBidderName'] ?? '',
       isInWatchlist: json['isInWatchlist'] ?? false,
@@ -76,21 +76,22 @@ class ArtworkModel {
   }
 
   Map<String, dynamic> toJson() {
-    final verificationStatus = status == 'verified' ? 'VERIFIED' : 'UNVERIFIED';
     return {
       'id': id,
-      'nama_karya': title,
-      'artist': artist,
-      'deskripsi': description,
+      'nama_karya': nama_karya,
+      'artistId': artistId,
+      'ownerId': ownerId,
+      'deskripsi': deskripsi,
       'imageUrl': imageUrl,
-      'katalog': category,
-      'min_bid_ammount': startingPrice,
+      'katalog': katalog,
+      'tags': tags,
+      'min_bid_ammount': min_bid_ammount,
       'currentPrice': currentPrice,
       'highestBid': highestBid,
       'lowestBid': lowestBid,
-      'verification_status': verificationStatus,
-      'createdAt': createdAt.toIso8601String(),
-      'close_bid_time': biddingEndTime?.toIso8601String(),
+      'verification_status': verification_status,
+      'open_bid_time': open_bid_time?.toIso8601String(),
+      'close_bid_time': close_bid_time?.toIso8601String(),
       'totalBids': totalBids,
       'lastBidderName': lastBidderName,
       'isInWatchlist': isInWatchlist,
@@ -99,36 +100,40 @@ class ArtworkModel {
 
   ArtworkModel copyWith({
     String? id,
-    String? title,
-    String? artist,
-    String? description,
+    String? nama_karya,
+    String? artistId,
+    String? ownerId,
+    String? deskripsi,
     String? imageUrl,
-    String? category,
-    double? startingPrice,
+    String? katalog,
+    String? tags,
+    int? min_bid_ammount,
     double? currentPrice,
     double? highestBid,
     double? lowestBid,
-    String? status,
-    DateTime? createdAt,
-    DateTime? biddingEndTime,
+    String? verification_status,
+    DateTime? open_bid_time,
+    DateTime? close_bid_time,
     int? totalBids,
     String? lastBidderName,
     bool? isInWatchlist,
   }) {
     return ArtworkModel(
       id: id ?? this.id,
-      title: title ?? this.title,
-      artist: artist ?? this.artist,
-      description: description ?? this.description,
+      nama_karya: nama_karya ?? this.nama_karya,
+      artistId: artistId ?? this.artistId,
+      ownerId: ownerId ?? this.ownerId,
+      deskripsi: deskripsi ?? this.deskripsi,
       imageUrl: imageUrl ?? this.imageUrl,
-      category: category ?? this.category,
-      startingPrice: startingPrice ?? this.startingPrice,
+      katalog: katalog ?? this.katalog,
+      tags: tags ?? this.tags,
+      min_bid_ammount: min_bid_ammount ?? this.min_bid_ammount,
       currentPrice: currentPrice ?? this.currentPrice,
       highestBid: highestBid ?? this.highestBid,
       lowestBid: lowestBid ?? this.lowestBid,
-      status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
-      biddingEndTime: biddingEndTime ?? this.biddingEndTime,
+      verification_status: verification_status ?? this.verification_status,
+      open_bid_time: open_bid_time ?? this.open_bid_time,
+      close_bid_time: close_bid_time ?? this.close_bid_time,
       totalBids: totalBids ?? this.totalBids,
       lastBidderName: lastBidderName ?? this.lastBidderName,
       isInWatchlist: isInWatchlist ?? this.isInWatchlist,

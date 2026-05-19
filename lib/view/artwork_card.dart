@@ -106,7 +106,7 @@ class ArtworkCard extends StatelessWidget {
                     }),
                   ),
                 ),
-                if (artwork.status == 'bidding')
+                if (artwork.close_bid_time != null)
                   Positioned(
                     top: 10,
                     left: 10,
@@ -129,7 +129,7 @@ class ArtworkCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            _timeLeft(artwork.biddingEndTime),
+                            _timeLeft(artwork.close_bid_time),
                             style: GoogleFonts.outfit(
                               color: Colors.white,
                               fontSize: 11,
@@ -148,7 +148,7 @@ class ArtworkCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    artwork.title,
+                    artwork.nama_karya,
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -159,7 +159,7 @@ class ArtworkCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    artwork.artist,
+                    artwork.artistId,
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       color: AppColors.textHint,
@@ -169,7 +169,7 @@ class ArtworkCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        'Rp ${_fmt(artwork.currentPrice)}',
+                        'Rp ${_fmt(artwork.min_bid_ammount.toDouble())}',
                         style: GoogleFonts.outfit(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -247,7 +247,7 @@ class ArtworkCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                if (artwork.status == 'bidding')
+                if (artwork.verification_status == 'VERIFIED')
                   Positioned(
                     top: 8,
                     left: 8,
@@ -261,7 +261,7 @@ class ArtworkCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'LIVE',
+                        'VERIFIED',
                         style: GoogleFonts.outfit(
                           color: Colors.white,
                           fontSize: 9,
@@ -291,7 +291,7 @@ class ArtworkCard extends StatelessWidget {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            artwork.category,
+                            artwork.katalog,
                             style: GoogleFonts.outfit(
                               fontSize: 10,
                               fontWeight: FontWeight.w600,
@@ -321,7 +321,7 @@ class ArtworkCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      artwork.title,
+                      artwork.nama_karya,
                       style: GoogleFonts.playfairDisplay(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
@@ -332,7 +332,7 @@ class ArtworkCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'oleh ${artwork.artist}',
+                      'ID: ${artwork.artistId}',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         color: AppColors.textHint,
@@ -343,7 +343,7 @@ class ArtworkCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Rp ${_fmt(artwork.currentPrice)}',
+                          'Rp ${_fmt(artwork.min_bid_ammount.toDouble())}',
                           style: GoogleFonts.outfit(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,

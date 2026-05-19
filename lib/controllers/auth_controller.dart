@@ -20,10 +20,7 @@ class AuthController extends GetxController {
     try {
       final response = await _api.post(
         '/user/login',
-        body: {
-          'email': email,
-          'password': password,
-        },
+        body: {'email': email, 'password': password},
       );
       final token = response is Map ? response['token']?.toString() : null;
       if (token == null || token.isEmpty) {
@@ -31,12 +28,15 @@ class AuthController extends GetxController {
       }
       await _api.setToken(token);
 
-      currentUser.value = UserModel(
-        id: 'usr_local',
-        name: email.split('@').first,
-        email: email,
-        role: 'collector',
-      );
+      final profileResp = await _api.get('/user/profile');
+      if (profileResp is Map && profileResp['user'] != null) {
+        currentUser.value = UserModel.fromJson(
+          profileResp['user'] as Map<String, dynamic>,
+        );
+      } else {
+        throw Exception('Gagal mengambil profil pengguna');
+      }
+
       isLoggedIn.value = true;
       Get.offAllNamed(AppRoutes.home);
     } catch (error) {
@@ -49,10 +49,10 @@ class AuthController extends GetxController {
   /// Register via API
   Future<void> register(
     String username,
-    String name,
+    String full_name,
     String email,
     String password,
-    String phone,
+    String phone_number,
   ) async {
     isLoading.value = true;
     try {
@@ -60,9 +60,9 @@ class AuthController extends GetxController {
         '/user/register',
         body: {
           'username': username,
-          'full_name': name,
+          'full_name': full_name,
           'email': email,
-          'phone_number': phone,
+          'phone_number': phone_number,
           'password': password,
           'role': 'KOLEKTOR',
         },
@@ -77,33 +77,52 @@ class AuthController extends GetxController {
     }
   }
 
-  /// Update account
-  Future<void> updateAccount({String? name, String? phone, String? email}) async {
+  /// Update account via API
+  Future<void> updateAccount({
+    String? full_name,
+    String? phone_number,
+    String? email,
+  }) async {
     isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 500));
-    if (currentUser.value != null) {
-      currentUser.value = currentUser.value!.copyWith(
-        name: name ?? currentUser.value!.name,
-        phone: phone ?? currentUser.value!.phone,
-        email: email ?? currentUser.value!.email,
+    try {
+      await _api.put(
+        '/user/update/profile',
+        body: {if (full_name != null) 'full_name': full_name},
       );
+      if (currentUser.value != null) {
+        currentUser.value = currentUser.value!.copyWith(
+          full_name: full_name ?? currentUser.value!.full_name,
+          phone_number: phone_number ?? currentUser.value!.phone_number,
+          email: email ?? currentUser.value!.email,
+        );
+      }
+      Get.snackbar('Berhasil', 'Profil berhasil diperbarui');
+    } catch (error) {
+      Get.snackbar('Gagal', error.toString());
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
-    Get.snackbar('Berhasil', 'Profil berhasil diperbarui');
   }
 
-  /// Delete account
+  /// Delete account via API
   Future<void> deleteAccount() async {
     isLoading.value = true;
-    await Future.delayed(const Duration(milliseconds: 500));
-    currentUser.value = null;
-    isLoggedIn.value = false;
-    isLoading.value = false;
-    Get.offAllNamed(AppRoutes.login);
-    Get.snackbar('Akun Dihapus', 'Akun Anda telah dihapus');
+    try {
+      await _api.delete('/user/delete');
+      await _api.clearToken();
+      currentUser.value = null;
+      isLoggedIn.value = false;
+      Get.offAllNamed(AppRoutes.login);
+      Get.snackbar('Akun Dihapus', 'Akun Anda telah dihapus');
+    } catch (error) {
+      Get.snackbar('Gagal', error.toString());
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void logout() {
+    _api.clearToken();
     currentUser.value = null;
     isLoggedIn.value = false;
     Get.offAllNamed(AppRoutes.login);

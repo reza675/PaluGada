@@ -1,27 +1,11 @@
-/// ApiService — Placeholder untuk integrasi API nantinya.
-///
-/// Saat ini semua data menggunakan mock di controller.
-/// Setelah endpoint API dari teman selesai, implementasi method di sini
-/// lalu panggil dari controller.
-///
-/// Contoh penggunaan nanti:
-/// ```dart
-/// class AuthController extends GetxController {
-///   final ApiService _api = Get.find<ApiService>();
-///
-///   Future<void> login(String email, String password) async {
-///     final response = await _api.post('/auth/login', body: {...});
-///     ...
-///   }
-/// }
-/// ```
 import 'dart:convert';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService extends GetxService {
-  static const String _defaultBaseUrl = 'http://127.0.0.1:3000';
+  static const String _defaultBaseUrl =
+      'https://tcc-final-project-805193520.us-central1.run.app';
   static const String _baseUrlKey = 'api_base_url';
   static const String _tokenKey = 'auth_token';
 
@@ -108,11 +92,7 @@ class ApiService extends GetxService {
   Future<dynamic> post(String endpoint, {Map<String, dynamic>? body}) async {
     final url = _resolveUrl(endpoint);
     final response = await http
-        .post(
-          url,
-          headers: await _buildHeaders(),
-          body: jsonEncode(body ?? {}),
-        )
+        .post(url, headers: await _buildHeaders(), body: jsonEncode(body ?? {}))
         .timeout(const Duration(seconds: 20));
     _ensureSuccess(response);
     return _decodeResponse(response);
@@ -122,11 +102,7 @@ class ApiService extends GetxService {
   Future<dynamic> put(String endpoint, {Map<String, dynamic>? body}) async {
     final url = _resolveUrl(endpoint);
     final response = await http
-        .put(
-          url,
-          headers: await _buildHeaders(),
-          body: jsonEncode(body ?? {}),
-        )
+        .put(url, headers: await _buildHeaders(), body: jsonEncode(body ?? {}))
         .timeout(const Duration(seconds: 20));
     _ensureSuccess(response);
     return _decodeResponse(response);

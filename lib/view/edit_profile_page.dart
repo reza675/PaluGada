@@ -10,13 +10,13 @@ class EditProfilePage extends StatelessWidget {
   final authCtrl = Get.find<AuthController>();
   final _formKey = GlobalKey<FormState>();
   late final _nameCtrl = TextEditingController(
-    text: authCtrl.currentUser.value?.name ?? '',
+    text: authCtrl.currentUser.value?.full_name ?? '',
   );
   late final _emailCtrl = TextEditingController(
     text: authCtrl.currentUser.value?.email ?? '',
   );
   late final _phoneCtrl = TextEditingController(
-    text: authCtrl.currentUser.value?.phone ?? '',
+    text: authCtrl.currentUser.value?.phone_number ?? '',
   );
 
   @override
@@ -77,7 +77,7 @@ class EditProfilePage extends StatelessWidget {
               TextFormField(
                 controller: _nameCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Nama Lengkap',
+                  labelText: 'Nama Lengkap (full_name)',
                   prefixIcon: Icon(
                     Icons.person_outline,
                     color: AppColors.primaryLight,
@@ -108,7 +108,7 @@ class EditProfilePage extends StatelessWidget {
                 controller: _phoneCtrl,
                 keyboardType: TextInputType.phone,
                 decoration: const InputDecoration(
-                  labelText: 'No. Telepon',
+                  labelText: 'No. Telepon (phone_number)',
                   prefixIcon: Icon(
                     Icons.phone_outlined,
                     color: AppColors.primaryLight,
@@ -126,9 +126,9 @@ class EditProfilePage extends StatelessWidget {
                         : () {
                             if (_formKey.currentState!.validate()) {
                               authCtrl.updateAccount(
-                                name: _nameCtrl.text,
+                                full_name: _nameCtrl.text,
                                 email: _emailCtrl.text,
-                                phone: _phoneCtrl.text,
+                                phone_number: _phoneCtrl.text,
                               );
                               Get.back();
                             }

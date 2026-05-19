@@ -105,9 +105,6 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// Dashboard (tab pertama di Home)
-// ═══════════════════════════════════════════════════════════════════
 class _HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -147,7 +144,7 @@ class _HomeDashboard extends StatelessWidget {
                           children: [
                             Obx(
                               () => Text(
-                                'Halo, ${authCtrl.currentUser.value?.name.split(' ').first ?? 'Kolektor'} 👋',
+                                'Halo, ${authCtrl.currentUser.value?.username != null && authCtrl.currentUser.value!.username.isNotEmpty ? authCtrl.currentUser.value!.username : 'Kolektor'} 👋',
                                 style: GoogleFonts.outfit(
                                   fontSize: 14,
                                   color: Colors.white.withValues(alpha: 0.85),
@@ -246,9 +243,9 @@ class _HomeDashboard extends StatelessWidget {
                   Expanded(
                     child: _StatCard(
                       icon: Icons.gavel,
-                      label: 'Aktif Bidding',
+                      label: 'Verified',
                       value:
-                          '${catCtrl.artworks.where((a) => a.status == "bidding").length}',
+                          '${catCtrl.artworks.where((a) => a.verification_status == "VERIFIED").length}',
                       color: AppColors.accentDark,
                     ),
                   ),
@@ -268,7 +265,7 @@ class _HomeDashboard extends StatelessWidget {
             ),
           ),
 
-          // Lelang Aktif
+          // Karya Seni Terverifikasi
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -276,7 +273,7 @@ class _HomeDashboard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Lelang Aktif 🔥',
+                    'Karya Terverifikasi 🔥',
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -304,8 +301,16 @@ class _HomeDashboard extends StatelessWidget {
               height: 300,
               child: Obx(() {
                 final items = catCtrl.artworks
-                    .where((a) => a.status == 'bidding')
+                    .where((a) => a.verification_status == 'VERIFIED')
                     .toList();
+                if (items.isEmpty) {
+                  return Center(
+                    child: Text(
+                      'Belum ada karya terverifikasi',
+                      style: GoogleFonts.outfit(color: AppColors.textHint),
+                    ),
+                  );
+                }
                 return ListView.builder(
                   scrollDirection: Axis.horizontal,
                   physics: const BouncingScrollPhysics(),
@@ -323,12 +328,12 @@ class _HomeDashboard extends StatelessWidget {
             ),
           ),
 
-          // Baru Ditambahkan
+          // Semua Karya
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
-                'Baru Ditambahkan',
+                'Semua Karya Seni',
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -340,7 +345,7 @@ class _HomeDashboard extends StatelessWidget {
 
           Obx(() {
             final items = catCtrl.artworks
-                .where((a) => a.status == 'verified')
+                .where((a) => a.verification_status == 'UNVERIFIED')
                 .toList();
             return SliverList(
               delegate: SliverChildBuilderDelegate(

@@ -1,49 +1,53 @@
+/// PaymentModel — matched to Prisma Payment schema
 class PaymentModel {
   final String id;
-  final String artworkId;
+  final int amount;
+  final double fee;
+  final String bidId;
+  final String paidById;
+  final DateTime timestamp;
   final String artworkTitle;
   final String artworkImageUrl;
-  final double amount;
-  final String status; // 'pending', 'completed', 'failed'
   final String paymentMethod;
-  final DateTime paymentDate;
 
   PaymentModel({
     required this.id,
-    required this.artworkId,
-    required this.artworkTitle,
-    this.artworkImageUrl = '',
     required this.amount,
-    this.status = 'completed',
+    this.fee = 0.035,
+    required this.bidId,
+    this.paidById = '',
+    DateTime? timestamp,
+    this.artworkTitle = '',
+    this.artworkImageUrl = '',
     this.paymentMethod = 'Bank Transfer',
-    DateTime? paymentDate,
-  }) : paymentDate = paymentDate ?? DateTime.now();
+  }) : timestamp = timestamp ?? DateTime.now();
 
   factory PaymentModel.fromJson(Map<String, dynamic> json) {
     return PaymentModel(
       id: json['id'] ?? '',
-      artworkId: json['artworkId'] ?? '',
+      amount: json['amount'] is int
+          ? json['amount']
+          : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+      fee: (json['fee'] ?? 0.035).toDouble(),
+      bidId: json['bidId'] ?? '',
+      paidById: json['paidById'] ?? '',
+      timestamp: json['timestamp'] != null
+          ? DateTime.parse(json['timestamp'])
+          : DateTime.now(),
       artworkTitle: json['artworkTitle'] ?? '',
       artworkImageUrl: json['artworkImageUrl'] ?? '',
-      amount: (json['amount'] ?? 0).toDouble(),
-      status: json['status'] ?? 'completed',
       paymentMethod: json['paymentMethod'] ?? 'Bank Transfer',
-      paymentDate: json['paymentDate'] != null
-          ? DateTime.parse(json['paymentDate'])
-          : DateTime.now(),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'artworkId': artworkId,
-      'artworkTitle': artworkTitle,
-      'artworkImageUrl': artworkImageUrl,
       'amount': amount,
-      'status': status,
-      'paymentMethod': paymentMethod,
-      'paymentDate': paymentDate.toIso8601String(),
+      'fee': fee,
+      'bidId': bidId,
+      'paidById': paidById,
+      'timestamp': timestamp.toIso8601String(),
     };
   }
 }

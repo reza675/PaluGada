@@ -79,22 +79,8 @@ class PaymentPage extends StatelessWidget {
                 itemCount: payCtrl.payments.length,
                 itemBuilder: (_, i) {
                   final pay = payCtrl.payments[i];
-                  Color statusColor;
-                  IconData statusIcon;
-                  switch (pay.status) {
-                    case 'completed':
-                      statusColor = AppColors.success;
-                      statusIcon = Icons.check_circle;
-                      break;
-                    case 'pending':
-                      statusColor = AppColors.warning;
-                      statusIcon = Icons.schedule;
-                      break;
-                    default:
-                      statusColor = AppColors.error;
-                      statusIcon = Icons.cancel;
-                      break;
-                  }
+                  const statusColor = AppColors.success;
+                  const statusIcon = Icons.check_circle;
                   return Container(
                     margin: const EdgeInsets.only(bottom: 12),
                     padding: const EdgeInsets.all(14),
@@ -153,9 +139,7 @@ class PaymentPage extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                DateFormat(
-                                  'dd MMM yyyy',
-                                ).format(pay.paymentDate),
+                                DateFormat('dd MMM yyyy').format(pay.timestamp),
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
                                   color: AppColors.textHint,
@@ -168,7 +152,7 @@ class PaymentPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
                             Text(
-                              'Rp ${_fmt(pay.amount)}',
+                              'Rp ${_fmt(pay.amount.toDouble())}',
                               style: GoogleFonts.outfit(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700,
@@ -195,7 +179,7 @@ class PaymentPage extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 4),
                                   Text(
-                                    pay.status.capitalizeFirst!,
+                                    'Paid',
                                     style: GoogleFonts.outfit(
                                       fontSize: 10,
                                       fontWeight: FontWeight.w600,

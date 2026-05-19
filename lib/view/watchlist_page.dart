@@ -103,7 +103,7 @@ class WatchlistPage extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            art.title,
+                            art.nama_karya,
                             style: GoogleFonts.playfairDisplay(
                               fontSize: 15,
                               fontWeight: FontWeight.w600,
@@ -114,7 +114,7 @@ class WatchlistPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'oleh ${art.artist}',
+                            'Katalog: ${art.katalog}',
                             style: GoogleFonts.outfit(
                               fontSize: 12,
                               color: AppColors.textHint,
@@ -122,7 +122,7 @@ class WatchlistPage extends StatelessWidget {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Rp ${_fmt(art.currentPrice)}',
+                            'Rp ${_fmt(art.min_bid_ammount.toDouble())}',
                             style: GoogleFonts.outfit(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,

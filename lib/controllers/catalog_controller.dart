@@ -9,7 +9,16 @@ class CatalogController extends GetxController {
   final isLoading = false.obs;
   final searchQuery = ''.obs;
   final selectedCategory = 'Semua'.obs;
-  final categories = ['Semua', 'Lukisan', 'Patung', 'Fotografi', 'Digital Art', 'Keramik'].obs;
+  final categories = [
+    'Semua',
+    'Lukisan',
+    'Patung',
+    'Fotografi',
+    'Digital Art',
+    'Keramik',
+    'Modern',
+    'Classic',
+  ].obs;
 
   @override
   void onInit() {
@@ -22,7 +31,9 @@ class CatalogController extends GetxController {
     try {
       final response = await _api.get('/karya-seni/all');
       final dataList = _extractList(response);
-      final mapped = dataList.map((json) => ArtworkModel.fromJson(json)).toList();
+      final mapped = dataList
+          .map((json) => ArtworkModel.fromJson(json))
+          .toList();
       artworks.assignAll(mapped);
       filteredArtworks.assignAll(mapped);
     } catch (error) {
@@ -55,22 +66,30 @@ class CatalogController extends GetxController {
   void _applyFilters() {
     List<ArtworkModel> result = artworks;
     if (selectedCategory.value != 'Semua') {
-      result = result.where((a) => a.category == selectedCategory.value).toList();
+      result = result
+          .where((a) => a.katalog == selectedCategory.value)
+          .toList();
     }
     if (searchQuery.value.isNotEmpty) {
       final q = searchQuery.value.toLowerCase();
-      result = result.where((a) =>
-        a.title.toLowerCase().contains(q) ||
-        a.artist.toLowerCase().contains(q) ||
-        a.category.toLowerCase().contains(q)
-      ).toList();
+      result = result
+          .where(
+            (a) =>
+                a.nama_karya.toLowerCase().contains(q) ||
+                a.artistId.toLowerCase().contains(q) ||
+                a.katalog.toLowerCase().contains(q),
+          )
+          .toList();
     }
     filteredArtworks.value = result;
   }
 
   ArtworkModel? getArtworkById(String id) {
-    try { return artworks.firstWhere((a) => a.id == id); }
-    catch (_) { return null; }
+    try {
+      return artworks.firstWhere((a) => a.id == id);
+    } catch (_) {
+      return null;
+    }
   }
 
   void toggleWatchlist(String artworkId) {

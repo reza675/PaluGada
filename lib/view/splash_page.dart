@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../theme/app_colors.dart';
 import '../routes/app_routes.dart';
+import '../services/api_service.dart';
+import '../controllers/auth_controller.dart';
+import '../models/user_model.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -37,10 +40,26 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
     );
     _fadeController.forward();
     _scaleController.forward();
-    Future.delayed(
-      const Duration(seconds: 3),
-      () => Get.offAllNamed(AppRoutes.login),
-    );
+
+    Future.delayed(const Duration(seconds: 3), () async {
+      final token = await Get.find<ApiService>().getToken();
+      if (token != null && token.isNotEmpty) {
+        try {
+          final profileResp = await Get.find<ApiService>().get('/user/profile');
+          if (profileResp is Map && profileResp['user'] != null) {
+            Get.find<AuthController>().currentUser.value = UserModel.fromJson(
+              profileResp['user'] as Map<String, dynamic>,
+            );
+            Get.find<AuthController>().isLoggedIn.value = true;
+            Get.offAllNamed(AppRoutes.home);
+            return;
+          }
+        } catch (_) {
+          // Token expired or network issue, fallback to login
+        }
+      }
+      Get.offAllNamed(AppRoutes.login);
+    });
   }
 
   @override

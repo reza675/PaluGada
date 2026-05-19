@@ -84,7 +84,9 @@ class BiddingPage extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            bidCtrl.lastBid!.bidderName,
+                            bidCtrl.lastBid!.bidderName.isNotEmpty
+                                ? bidCtrl.lastBid!.bidderName
+                                : bidCtrl.lastBid!.bidById,
                             style: GoogleFonts.outfit(
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -95,7 +97,7 @@ class BiddingPage extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      'Rp ${_fmt(bidCtrl.lastBid!.amount)}',
+                      'Rp ${_fmt(bidCtrl.lastBid!.amount.toDouble())}',
                       style: GoogleFonts.outfit(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -184,7 +186,7 @@ class BiddingPage extends StatelessWidget {
                               Text(
                                 DateFormat(
                                   'dd MMM yyyy, HH:mm',
-                                ).format(bid.bidTime),
+                                ).format(bid.timestamp),
                                 style: GoogleFonts.outfit(
                                   fontSize: 11,
                                   color: AppColors.textHint,
@@ -194,7 +196,7 @@ class BiddingPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Rp ${_fmt(bid.amount)}',
+                          'Rp ${_fmt(bid.amount.toDouble())}',
                           style: GoogleFonts.outfit(
                             fontSize: 14,
                             fontWeight: FontWeight.w700,
