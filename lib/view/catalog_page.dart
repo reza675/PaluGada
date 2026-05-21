@@ -18,7 +18,7 @@ class CatalogPage extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         slivers: [
           SliverAppBar(
-            expandedHeight: 140,
+            expandedHeight: 160,
             floating: true,
             snap: true,
             pinned: true,
@@ -58,24 +58,34 @@ class CatalogPage extends StatelessWidget {
               ),
             ),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(56),
+              preferredSize: const Size.fromHeight(68),
               child: Container(
                 margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: TextField(
                   onChanged: catCtrl.searchArtworks,
-                  style: GoogleFonts.outfit(color: Colors.white),
+                  style: GoogleFonts.outfit(color: Colors.black87),
                   decoration: InputDecoration(
                     hintText: 'Cari judul, seniman, kategori...',
                     hintStyle: GoogleFonts.outfit(
-                      color: Colors.white.withValues(alpha: 0.55),
+                      color: const Color.fromARGB(
+                        255,
+                        153,
+                        113,
+                        34,
+                      ).withValues(alpha: 0.7),
                     ),
                     prefixIcon: Icon(
                       Icons.search,
-                      color: Colors.white.withValues(alpha: 0.7),
+                      color: const Color.fromARGB(
+                        255,
+                        153,
+                        113,
+                        34,
+                      ).withValues(alpha: 0.7),
                     ),
                     border: InputBorder.none,
                     contentPadding: const EdgeInsets.symmetric(
@@ -93,19 +103,21 @@ class CatalogPage extends StatelessWidget {
             child: SizedBox(
               height: 52,
               child: Obx(
-                () => ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  itemCount: catCtrl.categories.length,
-                  itemBuilder: (_, i) {
-                    final cat = catCtrl.categories[i];
-                    final sel = catCtrl.selectedCategory.value == cat;
-                    return GestureDetector(
-                      onTap: () => catCtrl.filterByCategory(cat),
+                () {
+                  final currentSelected = catCtrl.selectedCategory.value;
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    itemCount: catCtrl.categories.length,
+                    itemBuilder: (_, i) {
+                      final cat = catCtrl.categories[i];
+                      final sel = currentSelected == cat;
+                      return GestureDetector(
+                        onTap: () => catCtrl.filterByCategory(cat),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
                         margin: const EdgeInsets.only(right: 10),
@@ -142,7 +154,8 @@ class CatalogPage extends StatelessWidget {
                       ),
                     );
                   },
-                ),
+                  );
+                },
               ),
             ),
           ),
@@ -168,13 +181,14 @@ class CatalogPage extends StatelessWidget {
 
           // List
           Obx(() {
-            if (catCtrl.isLoading.value)
+            if (catCtrl.isLoading.value) {
               return const SliverFillRemaining(
                 child: Center(
                   child: CircularProgressIndicator(color: AppColors.primary),
                 ),
               );
-            if (catCtrl.filteredArtworks.isEmpty)
+            }
+            if (catCtrl.filteredArtworks.isEmpty) {
               return SliverFillRemaining(
                 child: Center(
                   child: Column(
@@ -197,6 +211,7 @@ class CatalogPage extends StatelessWidget {
                   ),
                 ),
               );
+            }
             return SliverList(
               delegate: SliverChildBuilderDelegate(
                 (_, i) => Padding(

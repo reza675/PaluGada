@@ -273,21 +273,11 @@ class _HomeDashboard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Karya Terverifikasi 🔥',
+                    'Karya Terverifikasi',
                     style: GoogleFonts.playfairDisplay(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: AppColors.textPrimary,
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => homeCtrl.changeTab(1),
-                    child: Text(
-                      'Lihat Semua',
-                      style: GoogleFonts.outfit(
-                        color: AppColors.accent,
-                        fontWeight: FontWeight.w600,
-                      ),
                     ),
                   ),
                 ],

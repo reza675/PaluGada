@@ -11,9 +11,9 @@ class AppBindings extends Bindings {
   void dependencies() {
     Get.put(ApiService(), permanent: true);
     Get.put(AuthController(), permanent: true);
-    Get.put(CatalogController(), permanent: true);
-    Get.put(BiddingController(), permanent: true);
-    Get.put(PaymentController(), permanent: true);
-    Get.put(HomeController(), permanent: true);
+    Get.lazyPut(() => CatalogController(), fenix: true);
+    Get.lazyPut(() => BiddingController(), fenix: true);
+    Get.lazyPut(() => PaymentController(), fenix: true);
+    Get.lazyPut(() => HomeController(), fenix: true);
   }
 }
