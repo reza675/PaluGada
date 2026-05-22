@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import '../controllers/bidding_controller.dart';
+import '../controllers/auth_controller.dart';
 
 class BiddingPage extends StatelessWidget {
   const BiddingPage({super.key});
@@ -18,6 +19,9 @@ class BiddingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bidCtrl = Get.find<BiddingController>();
+    final authCtrl = Get.find<AuthController>();
+    final currentUserId = authCtrl.currentUser.value?.id;
+    final currentUserName = authCtrl.currentUser.value?.username ?? 'Anda';
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -83,15 +87,37 @@ class BiddingPage extends StatelessWidget {
                               color: AppColors.textHint,
                             ),
                           ),
-                          Text(
-                            bidCtrl.lastBid!.bidderName.isNotEmpty
-                                ? bidCtrl.lastBid!.bidderName
-                                : bidCtrl.lastBid!.bidById,
-                            style: GoogleFonts.outfit(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                              color: AppColors.textPrimary,
-                            ),
+                          Row(
+                            children: [
+                              Text(
+                                bidCtrl.lastBid!.bidById == currentUserId
+                                    ? '$currentUserName (Anda)'
+                                    : (bidCtrl.lastBid!.bidderName.length > 20
+                                        ? 'User (${bidCtrl.lastBid!.bidderName.substring(0, 6)})'
+                                        : bidCtrl.lastBid!.bidderName),
+                                style: GoogleFonts.outfit(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: bidCtrl.lastBid!.status == 'OPEN' ? AppColors.success.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  bidCtrl.lastBid!.status,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: bidCtrl.lastBid!.status == 'OPEN' ? AppColors.success : Colors.grey,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
@@ -175,13 +201,36 @@ class BiddingPage extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                bid.bidderName,
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textPrimary,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    bid.bidById == currentUserId
+                                        ? '$currentUserName (Anda)'
+                                        : (bid.bidderName.length > 20
+                                            ? 'User (${bid.bidderName.substring(0, 6)})'
+                                            : bid.bidderName),
+                                    style: GoogleFonts.outfit(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: bid.status == 'OPEN' ? AppColors.success.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: Text(
+                                      bid.status,
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        color: bid.status == 'OPEN' ? AppColors.success : Colors.grey,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                               Text(
                                 DateFormat(

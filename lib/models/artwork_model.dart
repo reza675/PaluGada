@@ -57,7 +57,7 @@ class ArtworkModel {
       artistId: json['artistId'] ?? '',
       ownerId: json['ownerId'],
       deskripsi: json['deskripsi'] ?? '',
-      imageUrl: json['imageUrl'] ?? '',
+      imageUrl: json['image_url'] ?? json['imageUrl'] ?? '',
       katalog: json['katalog'] ?? 'Lukisan',
       tags: json['tags'],
       min_bid_ammount: json['min_bid_ammount'] is int
@@ -138,5 +138,21 @@ class ArtworkModel {
       lastBidderName: lastBidderName ?? this.lastBidderName,
       isInWatchlist: isInWatchlist ?? this.isInWatchlist,
     );
+  }
+
+// Cek lelang masih berlangsung
+  bool get isBiddingOpen {
+    if (open_bid_time == null || close_bid_time == null) return false;
+    
+    final now = DateTime.now().toUtc(); 
+    
+    return now.isAfter(open_bid_time!) && now.isBefore(close_bid_time!);
+  }
+
+// Cek lelang sudah ditutup
+  bool get isBiddingClosed {
+    if (close_bid_time == null) return false;
+    final now = DateTime.now().toUtc();
+    return now.isAfter(close_bid_time!);
   }
 }

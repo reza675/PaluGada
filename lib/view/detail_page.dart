@@ -263,7 +263,7 @@ class DetailPage extends StatelessWidget {
       bottomSheet: Container(
         padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: AppColors.background,
           boxShadow: [
             BoxShadow(
               color: AppColors.primaryDark.withValues(alpha: 0.1),
@@ -276,22 +276,28 @@ class DetailPage extends StatelessWidget {
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: () =>
-                _showBidDialog(context, art.id, art.min_bid_ammount),
+            onPressed: art.isBiddingOpen
+                ? () => _showBidDialog(context, art.id, art.min_bid_ammount)
+                : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: art.isBiddingOpen
+                  ? AppColors.primary
+                  : Colors.grey.shade400,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(18),
               ),
-              elevation: 4,
+              elevation: art.isBiddingOpen ? 4 : 0,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.gavel, color: Colors.white),
+                Icon(
+                  art.isBiddingOpen ? Icons.gavel : Icons.block,
+                  color: Colors.white,
+                ),
                 const SizedBox(width: 10),
                 Text(
-                  'Pasang Bid',
+                  art.isBiddingOpen ? 'Pasang Bid' : 'Lelang Ditutup',
                   style: GoogleFonts.outfit(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
