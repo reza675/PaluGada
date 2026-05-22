@@ -114,242 +114,276 @@ class _HomeDashboard extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Hero Header
-          SliverToBoxAdapter(
-            child: Container(
-              padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top + 20,
-                left: 24,
-                right: 24,
-                bottom: 28,
-              ),
-              decoration: const BoxDecoration(
-                gradient: AppColors.warmGradient,
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(32),
-                  bottomRight: Radius.circular(32),
+      body: RefreshIndicator(
+        onRefresh: () async {
+          await catCtrl.loadArtworks();
+        },
+        color: AppColors.primary,
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          slivers: [
+            // Hero Header
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 20,
+                  left: 24,
+                  right: 24,
+                  bottom: 28,
                 ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Obx(
-                              () => Text(
-                                'Halo, ${authCtrl.currentUser.value?.username != null && authCtrl.currentUser.value!.username.isNotEmpty ? authCtrl.currentUser.value!.username : 'Kolektor'} 👋',
-                                style: GoogleFonts.outfit(
-                                  fontSize: 14,
-                                  color: Colors.white.withValues(alpha: 0.85),
+                decoration: const BoxDecoration(
+                  gradient: AppColors.warmGradient,
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(32),
+                    bottomRight: Radius.circular(32),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Obx(
+                                () => Text(
+                                  'Halo, ${authCtrl.currentUser.value?.username != null && authCtrl.currentUser.value!.username.isNotEmpty ? authCtrl.currentUser.value!.username : 'Kolektor'} 👋',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 14,
+                                    color: Colors.white.withValues(alpha: 0.85),
+                                  ),
                                 ),
                               ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Temukan Karya\nSeni Impianmu',
+                                style: GoogleFonts.playfairDisplay(
+                                  fontSize: 26,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  height: 1.2,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () => homeCtrl.changeTab(4),
+                          child: Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(18),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
                             ),
-                            const SizedBox(height: 4),
+                            child: const Icon(
+                              Icons.person,
+                              color: Colors.white,
+                              size: 28,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () => homeCtrl.changeTab(1),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 18,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.search,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              size: 22,
+                            ),
+                            const SizedBox(width: 12),
                             Text(
-                              'Temukan Karya\nSeni Impianmu',
-                              style: GoogleFonts.playfairDisplay(
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                height: 1.2,
+                              'Cari karya seni...',
+                              style: GoogleFonts.outfit(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 14,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () => homeCtrl.changeTab(4),
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(18),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
-                              width: 1.5,
-                            ),
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  GestureDetector(
-                    onTap: () => homeCtrl.changeTab(1),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 18,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.15),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.search,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            size: 22,
-                          ),
-                          const SizedBox(width: 12),
-                          Text(
-                            'Cari karya seni...',
-                            style: GoogleFonts.outfit(
-                              color: Colors.white.withValues(alpha: 0.6),
-                              fontSize: 14,
-                            ),
-                          ),
-                        ],
-                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Stats
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.palette,
-                      label: 'Karya Seni',
-                      value: '${catCtrl.artworks.length}',
-                      color: AppColors.primary,
+            // Stats
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+              child: Obx(
+                () => Row(
+                  children: [
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.palette,
+                        label: 'Karya Seni',
+                        value: '${catCtrl.artworks.length}',
+                        color: AppColors.primary,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _StatCard(
-                      icon: Icons.gavel,
-                      label: 'Verified',
-                      value:
-                          '${catCtrl.artworks.where((a) => a.verification_status == "VERIFIED").length}',
-                      color: AppColors.accentDark,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
+                        icon: Icons.gavel,
+                        label: 'Verified',
+                        value:
+                            '${catCtrl.artworks.where((a) => a.verification_status == "VERIFIED").length}',
+                        color: AppColors.accentDark,
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Obx(
-                      () => _StatCard(
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _StatCard(
                         icon: Icons.bookmark,
                         label: 'Watchlist',
                         value: '${catCtrl.watchlistItems.length}',
                         color: AppColors.success,
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
               ),
             ),
-          ),
-
-          // Karya Seni Terverifikasi
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Karya Terverifikasi',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+            // Karya Unggulan
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Karya Unggulan',
+                      style: GoogleFonts.playfairDisplay(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
 
-          // Horizontal list
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: 300,
-              child: Obx(() {
-                final items = catCtrl.artworks
-                    .where((a) => a.verification_status == 'VERIFIED')
-                    .toList();
-                if (items.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'Belum ada karya terverifikasi',
-                      style: GoogleFonts.outfit(color: AppColors.textHint),
+            // Horizontal list
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 300,
+                child: Obx(() {
+                  final now = DateTime.now();
+
+                  // cari yang waktu bid-nya masih berjalan
+                  var featuredItems = catCtrl.artworks
+                      .where(
+                        (a) =>
+                            a.verification_status == 'VERIFIED' &&
+                            a.close_bid_time != null &&
+                            a.close_bid_time!.isAfter(now),
+                      )
+                      .toList();
+
+                  // Jika kosong (untuk testing/melihat hasil), tampilkan yang sudah berakhir
+                  if (featuredItems.isEmpty) {
+                    featuredItems = catCtrl.artworks
+                        .where(
+                          (a) =>
+                              a.verification_status == 'VERIFIED' &&
+                              a.close_bid_time != null &&
+                              a.close_bid_time!.isBefore(now),
+                        )
+                        .toList();
+                  }
+
+                  featuredItems.sort(
+                    (a, b) => b.totalBids.compareTo(a.totalBids),
+                  );
+
+                  final items = featuredItems.take(3).toList();
+
+                  if (items.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'Belum ada karya unggulan',
+                        style: GoogleFonts.outfit(color: AppColors.textHint),
+                      ),
+                    );
+                  }
+                  return ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: items.length,
+                    itemBuilder: (_, i) => Padding(
+                      padding: const EdgeInsets.only(right: 4),
+                      child: SizedBox(
+                        width: 220,
+                        child: ArtworkCard(artwork: items[i], isCompact: true),
+                      ),
                     ),
                   );
-                }
-                return ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  physics: const BouncingScrollPhysics(),
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: items.length,
-                  itemBuilder: (_, i) => Padding(
-                    padding: const EdgeInsets.only(right: 4),
-                    child: SizedBox(
-                      width: 220,
-                      child: ArtworkCard(artwork: items[i], isCompact: true),
-                    ),
+                }),
+              ),
+            ),
+
+            // Semua Karya
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: Text(
+                  'Semua Karya Seni',
+                  style: GoogleFonts.playfairDisplay(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
                   ),
-                );
-              }),
-            ),
-          ),
-
-          // Semua Karya
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-              child: Text(
-                'Semua Karya Seni',
-                style: GoogleFonts.playfairDisplay(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
                 ),
               ),
             ),
-          ),
 
-          Obx(() {
-            final items = catCtrl.artworks
-                .where((a) => a.verification_status == 'UNVERIFIED')
-                .toList();
-            return SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (_, i) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: ArtworkCard(artwork: items[i]),
+            Obx(() {
+              final items = catCtrl.artworks
+                  .where((a) => a.verification_status == 'UNVERIFIED')
+                  .toList();
+              return SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (_, i) => Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: ArtworkCard(artwork: items[i]),
+                  ),
+                  childCount: items.length,
                 ),
-                childCount: items.length,
-              ),
-            );
-          }),
+              );
+            }),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 20)),
-        ],
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
+          ],
+        ),
       ),
     );
   }

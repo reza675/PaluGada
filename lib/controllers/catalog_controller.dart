@@ -31,9 +31,29 @@ class CatalogController extends GetxController {
     try {
       final response = await _api.get('/karya-seni/all');
       final dataList = _extractList(response);
-      final mapped = dataList
-          .map((json) => ArtworkModel.fromJson(json))
-          .toList();
+
+      // Hitung total bid dari endpoint /bid tanpa mengubah backend
+      Map<String, int> bidCounts = {};
+      try {
+        final bidResponse = await _api.get('/bid');
+        final bidList = _extractList(bidResponse);
+        for (var b in bidList) {
+          final artworkId = b['artworksId']?.toString();
+          if (artworkId != null) {
+            bidCounts[artworkId] = (bidCounts[artworkId] ?? 0) + 1;
+          }
+        }
+      } catch (_) {
+        // Abaikan jika gagal memuat history bid (misal saat belum login)
+      }
+
+      final mapped = dataList.map((json) {
+        final data = Map<String, dynamic>.from(json);
+        final id = data['id']?.toString();
+        data['totalBids'] = id != null ? (bidCounts[id] ?? 0) : 0;
+        return ArtworkModel.fromJson(data);
+      }).toList();
+
       artworks.assignAll(mapped);
       filteredArtworks.assignAll(mapped);
     } catch (error) {
