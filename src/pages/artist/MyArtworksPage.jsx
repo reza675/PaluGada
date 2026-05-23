@@ -42,14 +42,14 @@ export default function MyArtworksPage() {
   ];
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 lg:space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold font-serif text-surface-50">Karya Saya</h1>
-          <p className="text-sm text-surface-400 mt-1">Kelola semua karya seni yang telah Anda upload</p>
+          <h1 className="text-2xl sm:text-3xl font-bold font-serif text-surface-50">Karya Saya</h1>
+          <p className="text-sm text-surface-400 mt-1.5">Kelola semua karya seni yang telah Anda upload</p>
         </div>
-        <Button onClick={() => navigate('/artist/artworks/create')}>
+        <Button onClick={() => navigate('/artist/artworks/create')} id="upload-new-artwork">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -58,15 +58,15 @@ export default function MyArtworksPage() {
       </div>
 
       {/* Filter */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap" id="artwork-filters">
         {filters.map((f) => (
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 active:scale-95 ${
               filter === f.key
-                ? 'bg-primary-600/20 text-primary-400 border border-primary-600/30'
-                : 'text-surface-400 hover:bg-surface-700/50 border border-transparent'
+                ? 'bg-primary-600/20 text-primary-400 border border-primary-600/30 shadow-sm'
+                : 'text-surface-400 hover:bg-surface-700/50 hover:text-surface-200 border border-transparent'
             }`}
           >
             {f.label}
@@ -91,13 +91,13 @@ export default function MyArtworksPage() {
         title="Hapus Karya"
         size="sm"
       >
-        <div className="space-y-4">
-          <p className="text-surface-300">
+        <div className="space-y-5">
+          <p className="text-surface-300 leading-relaxed">
             Apakah Anda yakin ingin menghapus <strong className="text-surface-100">&quot;{deleteModal.artwork?.title}&quot;</strong>? 
             Tindakan ini tidak dapat dibatalkan.
           </p>
           <div className="flex gap-3">
-            <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm}>
+            <Button variant="danger" fullWidth loading={deleting} onClick={handleDeleteConfirm} id="confirm-delete">
               Ya, Hapus
             </Button>
             <Button variant="secondary" fullWidth onClick={() => setDeleteModal({ open: false, artwork: null })}>

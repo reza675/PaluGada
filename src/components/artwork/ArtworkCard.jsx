@@ -7,13 +7,13 @@ export default function ArtworkCard({ artwork, showActions = false, onEdit, onDe
   const navigate = useNavigate();
 
   return (
-    <Card className="group">
+    <Card className="group" id={`artwork-card-${artwork.id}`}>
       {/* Image */}
       <div className="relative overflow-hidden aspect-[4/3]">
         <img
           src={artwork.image_url}
           alt={artwork.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-surface-950/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -25,24 +25,29 @@ export default function ArtworkCard({ artwork, showActions = false, onEdit, onDe
 
         {/* Price overlay on hover */}
         <div className="absolute bottom-3 left-3 right-3 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-          <p className="text-lg font-bold text-white">
+          <p className="text-lg font-bold text-white drop-shadow-lg">
             {formatCurrency(artwork.starting_price)}
           </p>
         </div>
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-2">
-        <h3 className="text-base font-semibold text-surface-100 line-clamp-1 group-hover:text-primary-400 transition-colors">
+      <div className="p-4 sm:p-5 space-y-2.5">
+        <h3 className="text-base font-semibold text-surface-100 line-clamp-1 group-hover:text-primary-400 transition-colors duration-200">
           {artwork.title}
         </h3>
-        <p className="text-sm text-surface-400 line-clamp-2">
+        <p className="text-sm text-surface-400 line-clamp-2 leading-relaxed">
           {truncateText(artwork.description, 80)}
         </p>
-        <div className="flex items-center justify-between pt-2">
-          <span className="text-xs text-surface-500">{artwork.medium}</span>
+        <div className="flex items-center justify-between pt-1">
+          <span className="text-xs text-surface-500 font-medium">{artwork.medium}</span>
           <span className="text-xs text-surface-500">{artwork.year_created}</span>
         </div>
+
+        {/* Mobile price (always visible) */}
+        <p className="text-sm font-semibold text-primary-400 sm:hidden pt-1">
+          {formatCurrency(artwork.starting_price)}
+        </p>
 
         {/* Actions */}
         {showActions && (
@@ -52,18 +57,20 @@ export default function ArtworkCard({ artwork, showActions = false, onEdit, onDe
                 e.stopPropagation();
                 onEdit?.(artwork);
               }}
-              className="flex-1 px-3 py-2 text-xs font-medium text-primary-400 bg-primary-600/10 hover:bg-primary-600/20 rounded-lg transition-colors"
+              className="flex-1 px-3 py-2.5 text-xs font-medium text-primary-400 bg-primary-600/10 hover:bg-primary-600/20 rounded-lg transition-all duration-200 active:scale-[0.97]"
+              id={`edit-artwork-${artwork.id}`}
             >
-              Edit
+              ✏️ Edit
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onDelete?.(artwork);
               }}
-              className="flex-1 px-3 py-2 text-xs font-medium text-red-400 bg-red-600/10 hover:bg-red-600/20 rounded-lg transition-colors"
+              className="flex-1 px-3 py-2.5 text-xs font-medium text-red-400 bg-red-600/10 hover:bg-red-600/20 rounded-lg transition-all duration-200 active:scale-[0.97]"
+              id={`delete-artwork-${artwork.id}`}
             >
-              Hapus
+              🗑️ Hapus
             </button>
           </div>
         )}

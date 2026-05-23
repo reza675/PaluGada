@@ -1,12 +1,21 @@
+import { useContext, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { SidebarContext } from '../../App';
 
 export default function Sidebar() {
   const { isArtist, isCurator } = useAuth();
   const location = useLocation();
+  const sidebarCtx = useContext(SidebarContext);
+  const isOpen = sidebarCtx?.sidebarOpen ?? false;
 
   // Don't show sidebar on auth pages
   if (['/login', '/register'].includes(location.pathname)) return null;
+
+  // Close sidebar on route change (mobile)
+  useEffect(() => {
+    sidebarCtx?.setSidebarOpen?.(false);
+  }, [location.pathname]);
 
   const artistLinks = [
     {
@@ -71,37 +80,59 @@ export default function Sidebar() {
 
   const links = isArtist ? artistLinks : isCurator ? curatorLinks : [];
 
-  return (
-    <aside className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass border-r border-surface-600/30 z-30 hidden lg:block">
-      <div className="flex flex-col h-full">
-        {/* Navigation */}
-        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
-          {links.map((link) => (
-            <NavLink
-              key={link.to}
-              to={link.to}
-              end={link.to.endsWith('dashboard')}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-primary-600/15 text-primary-400 border border-primary-600/30 shadow-sm'
-                    : 'text-surface-400 hover:bg-surface-700/50 hover:text-surface-200'
-                }`
-              }
-            >
-              <span className="transition-transform group-hover:scale-110">{link.icon}</span>
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
+  const sidebarContent = (
+    <div className="flex flex-col h-full">
+      {/* Navigation */}
+      <nav className="flex-1 px-3 py-6 space-y-1.5 overflow-y-auto" id="sidebar-nav">
+        {links.map((link) => (
+          <NavLink
+            key={link.to}
+            to={link.to}
+            end={link.to.endsWith('dashboard')}
+            className={({ isActive }) =>
+              `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                isActive
+                  ? 'bg-primary-600/15 text-primary-400 border border-primary-600/30 shadow-sm'
+                  : 'text-surface-400 hover:bg-surface-700/50 hover:text-surface-200 border border-transparent'
+              }`
+            }
+          >
+            <span className="transition-transform group-hover:scale-110 flex-shrink-0">{link.icon}</span>
+            <span className="truncate">{link.label}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-        {/* Footer info */}
-        <div className="px-4 py-4 border-t border-surface-600/30">
-          <p className="text-xs text-surface-500 text-center">
-            PaluGada v1.0 · © 2025
-          </p>
-        </div>
+      {/* Footer info */}
+      <div className="px-4 py-4 border-t border-surface-600/30">
+        <p className="text-xs text-surface-500 text-center">
+          PaluGada v1.0 · © 2025
+        </p>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop sidebar — fixed, always visible */}
+      <aside className="fixed top-16 left-0 w-64 h-[calc(100vh-4rem)] glass border-r border-surface-600/30 z-30 hidden lg:block" id="desktop-sidebar">
+        {sidebarContent}
+      </aside>
+
+      {/* Mobile sidebar overlay */}
+      {isOpen && (
+        <div className="fixed inset-0 z-40 lg:hidden" id="mobile-sidebar-overlay">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
+            onClick={() => sidebarCtx?.setSidebarOpen(false)}
+          />
+          {/* Drawer */}
+          <aside className="absolute top-16 left-0 w-72 h-[calc(100vh-4rem)] glass border-r border-surface-600/30 animate-slide-in-left shadow-2xl" id="mobile-sidebar">
+            {sidebarContent}
+          </aside>
+        </div>
+      )}
+    </>
   );
 }

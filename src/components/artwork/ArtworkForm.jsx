@@ -71,7 +71,7 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
   }));
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
+    <form onSubmit={handleSubmit} className="space-y-5" id="artwork-form">
       <Input
         id="title"
         label="Judul Karya"
@@ -94,7 +94,7 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
         required
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <Input
           id="category_id"
           label="Kategori"
@@ -118,7 +118,7 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <Input
           id="dimensions"
           label="Dimensi"
@@ -162,7 +162,7 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
           <img
             src={formData.image_url || initialData?.image_url}
             alt="Preview"
-            className="w-full h-48 object-cover"
+            className="w-full h-40 sm:h-48 object-cover"
             onError={(e) => {
               e.target.src = 'https://picsum.photos/seed/placeholder/800/600';
             }}
@@ -171,15 +171,15 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
       )}
 
       {/* Actions */}
-      <div className="flex gap-3 pt-4">
-        <Button type="submit" loading={isLoading} fullWidth>
-          {initialData ? 'Simpan Perubahan' : 'Upload Karya'}
-        </Button>
+      <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-surface-600/30">
         {onCancel && (
           <Button type="button" variant="secondary" onClick={onCancel} fullWidth>
             Batal
           </Button>
         )}
+        <Button type="submit" loading={isLoading} fullWidth id="submit-artwork">
+          {initialData ? 'Simpan Perubahan' : 'Upload Karya'}
+        </Button>
       </div>
     </form>
   );

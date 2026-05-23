@@ -1,3 +1,4 @@
+import { useState, createContext, useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 
@@ -21,6 +22,10 @@ import AccountSettingsPage from './pages/artist/AccountSettingsPage';
 // Curator Pages
 import CuratorDashboard from './pages/curator/CuratorDashboard';
 
+// Sidebar context for mobile toggle
+export const SidebarContext = createContext();
+export const useSidebar = () => useContext(SidebarContext);
+
 // Protected Route wrapper
 function ProtectedRoute({ children, allowedRole }) {
   const { isAuthenticated, currentUser } = useAuth();
@@ -34,17 +39,23 @@ function ProtectedRoute({ children, allowedRole }) {
 
 // Layout wrapper for authenticated pages
 function DashboardLayout({ children }) {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Navbar />
-      <div className="flex flex-1 pt-16">
-        <Sidebar />
-        <main className="flex-1 lg:ml-64 p-6 lg:p-8">
-          {children}
-        </main>
+    <SidebarContext.Provider value={{ sidebarOpen, setSidebarOpen }}>
+      <div className="min-h-screen flex flex-col bg-surface-900">
+        <Navbar />
+        <div className="flex flex-1 pt-16">
+          <Sidebar />
+          <main className="flex-1 lg:ml-64 p-4 sm:p-6 lg:p-8 min-h-[calc(100vh-4rem)]">
+            <div className="max-w-6xl mx-auto">
+              {children}
+            </div>
+          </main>
+        </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
+    </SidebarContext.Provider>
   );
 }
 

@@ -34,11 +34,13 @@
   --font-serif: 'Playfair Display', serif;
 }
 
-/* Base Styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+/* Base Styles — must be layered so Tailwind utilities can override */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 }
 
 html {
