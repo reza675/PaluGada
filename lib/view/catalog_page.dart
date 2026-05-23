@@ -98,7 +98,6 @@ class CatalogPage extends StatelessWidget {
             ),
           ),
 
-          // Category chips
           SliverToBoxAdapter(
             child: SizedBox(
               height: 52,
@@ -160,7 +159,6 @@ class CatalogPage extends StatelessWidget {
             ),
           ),
 
-          // Count
           SliverToBoxAdapter(
             child: Obx(
               () => Padding(
@@ -179,7 +177,6 @@ class CatalogPage extends StatelessWidget {
             ),
           ),
 
-          // List
           Obx(() {
             if (catCtrl.isLoading.value) {
               return const SliverFillRemaining(

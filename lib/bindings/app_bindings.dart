@@ -4,6 +4,8 @@ import '../controllers/catalog_controller.dart';
 import '../controllers/bidding_controller.dart';
 import '../controllers/payment_controller.dart';
 import '../controllers/home_controller.dart';
+import '../controllers/notification_controller.dart';
+import '../controllers/wallet_controller.dart';
 import '../services/api_service.dart';
 
 class AppBindings extends Bindings {
@@ -15,5 +17,7 @@ class AppBindings extends Bindings {
     Get.lazyPut(() => BiddingController(), fenix: true);
     Get.lazyPut(() => PaymentController(), fenix: true);
     Get.lazyPut(() => HomeController(), fenix: true);
+    Get.lazyPut(() => NotificationController(), fenix: true);
+    Get.lazyPut(() => WalletController(), fenix: true);
   }
 }

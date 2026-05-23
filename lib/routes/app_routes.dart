@@ -10,4 +10,7 @@ abstract class AppRoutes {
   static const editProfile = '/edit-profile';
   static const watchlist = '/watchlist';
   static const paymentHistory = '/payment-history';
+  static const notifications = '/notifications';
+  static const paymentDetail = '/payment-detail';
+  static const wallet = '/wallet';
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Earthy / Brown color palette for Pasar Lelang Barang Seni
 class AppColors {
   AppColors._();
 

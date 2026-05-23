@@ -1,4 +1,3 @@
-/// BidModel — matched to Prisma Bid schema
 class BidModel {
   final String id;
   final String artworksId;

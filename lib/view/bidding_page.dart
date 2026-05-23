@@ -5,6 +5,11 @@ import 'package:intl/intl.dart';
 import '../theme/app_colors.dart';
 import '../controllers/bidding_controller.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/payment_controller.dart';
+import '../controllers/catalog_controller.dart';
+import '../models/bid_model.dart';
+import '../models/artwork_model.dart';
+
 
 class BiddingPage extends StatelessWidget {
   const BiddingPage({super.key});
@@ -16,12 +21,72 @@ class BiddingPage extends StatelessWidget {
         (m) => '${m[1]}.',
       );
 
+  Widget _buildStatusBadge({
+    required BidModel bid,
+    required ArtworkModel? artwork,
+    required bool isHighest,
+    required PaymentController payCtrl,
+    required String? currentUserId,
+  }) {
+    if (artwork == null) {
+      return _badgeWidget(text: 'OPEN', color: AppColors.success);
+    }
+
+    final isClosed = artwork.isBiddingClosed;
+
+    if (isClosed) {
+      if (isHighest) {
+        final hasPaid = payCtrl.payments.any((p) => p.bidId == bid.id);
+        if (hasPaid) {
+          return _badgeWidget(text: 'DIBAYAR', color: AppColors.success);
+        } else {
+          if (bid.bidById == currentUserId) {
+            return _badgeWidget(text: 'MENANG (BELUM DIBAYAR)', color: Colors.blue);
+          } else {
+            return _badgeWidget(text: 'MENANG', color: AppColors.accentDark);
+          }
+        }
+      } else {
+        return _badgeWidget(text: 'KALAH (OUTBID)', color: Colors.grey);
+      }
+    } else {
+      if (isHighest) {
+        return _badgeWidget(text: 'TERTINGGI', color: Colors.amber.shade800);
+      } else {
+        return _badgeWidget(text: 'OUTBID', color: Colors.grey);
+      }
+    }
+  }
+
+  Widget _badgeWidget({required String text, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(4),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 0.5),
+      ),
+      child: Text(
+        text,
+        style: GoogleFonts.outfit(
+          fontSize: 9,
+          color: color,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final bidCtrl = Get.find<BiddingController>();
     final authCtrl = Get.find<AuthController>();
+    final payCtrl = Get.find<PaymentController>();
+    final catalogCtrl = Get.find<CatalogController>();
+
     final currentUserId = authCtrl.currentUser.value?.id;
     final currentUserName = authCtrl.currentUser.value?.username ?? 'Anda';
+    final artwork = catalogCtrl.getArtworkById(bidCtrl.currentArtworkId.value);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -102,20 +167,12 @@ class BiddingPage extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: bidCtrl.lastBid!.status == 'OPEN' ? AppColors.success.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                                child: Text(
-                                  bidCtrl.lastBid!.status,
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: bidCtrl.lastBid!.status == 'OPEN' ? AppColors.success : Colors.grey,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                              _buildStatusBadge(
+                                bid: bidCtrl.lastBid!,
+                                artwork: artwork,
+                                isHighest: true,
+                                payCtrl: payCtrl,
+                                currentUserId: currentUserId,
                               ),
                             ],
                           ),
@@ -216,19 +273,12 @@ class BiddingPage extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: bid.status == 'OPEN' ? AppColors.success.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.1),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text(
-                                      bid.status,
-                                      style: TextStyle(
-                                        fontSize: 9,
-                                        color: bid.status == 'OPEN' ? AppColors.success : Colors.grey,
-                                      ),
-                                    ),
+                                  _buildStatusBadge(
+                                    bid: bid,
+                                    artwork: artwork,
+                                    isHighest: isFirst,
+                                    payCtrl: payCtrl,
+                                    currentUserId: currentUserId,
                                   ),
                                 ],
                               ),

@@ -5,10 +5,20 @@ import '../theme/app_colors.dart';
 import '../models/artwork_model.dart';
 import '../controllers/catalog_controller.dart';
 import '../controllers/bidding_controller.dart';
+import '../controllers/auth_controller.dart';
+import '../controllers/payment_controller.dart';
+import '../controllers/wallet_controller.dart';
 import '../routes/app_routes.dart';
 
-class DetailPage extends StatelessWidget {
+class DetailPage extends StatefulWidget {
   const DetailPage({super.key});
+
+  @override
+  State<DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  String? _artistName;
 
   String _fmt(double v) => v
       .toStringAsFixed(0)
@@ -27,13 +37,47 @@ class DetailPage extends StatelessWidget {
   }
 
   @override
+  void initState() {
+    super.initState();
+    // Fetch detail artwork (termasuk nama artist) dari GET /karya-seni/:id
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final String artId;
+      if (Get.arguments is Map) {
+        artId = Get.arguments['id'] as String;
+      } else {
+        artId = Get.arguments as String;
+      }
+      final catCtrl = Get.find<CatalogController>();
+      final cached = catCtrl.getArtworkById(artId);
+      if (cached != null && cached.artistName.isNotEmpty) {
+        setState(() => _artistName = cached.artistName);
+        return;
+      }
+      final detail = await catCtrl.fetchArtworkDetail(artId);
+      if (detail != null && mounted) {
+        setState(() => _artistName = detail.artistName);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final id = Get.arguments as String;
+    final String id;
+    if (Get.arguments is Map) {
+      id = Get.arguments['id'] as String;
+    } else {
+      id = Get.arguments as String;
+    }
+
     final catCtrl = Get.find<CatalogController>();
     final bidCtrl = Get.find<BiddingController>();
+    final authCtrl = Get.find<AuthController>();
+    final payCtrl = Get.find<PaymentController>();
     final art = catCtrl.getArtworkById(id);
-    if (art == null)
+    if (art == null) {
       return const Scaffold(body: Center(child: Text('Tidak ditemukan')));
+    }
+
     bidCtrl.loadBidsForArtwork(id);
 
     return Scaffold(
@@ -118,7 +162,7 @@ class DetailPage extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          'Artist: ${art.artistId}',
+                          'Artist: ${_artistName ?? (art.artistName.isNotEmpty ? art.artistName : 'Memuat...')}',
                           style: GoogleFonts.outfit(
                             fontSize: 14,
                             color: Colors.white.withValues(alpha: 0.8),
@@ -148,7 +192,6 @@ class DetailPage extends StatelessWidget {
                     const SizedBox(height: 20),
                   ],
 
-                  // Status badge
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 12,
@@ -260,55 +303,43 @@ class DetailPage extends StatelessWidget {
           ),
         ],
       ),
-      bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
-        decoration: BoxDecoration(
-          color: AppColors.background,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primaryDark.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, -5),
-            ),
-          ],
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: ElevatedButton(
-            onPressed: art.isBiddingOpen
-                ? () => _showBidDialog(context, art.id, art.min_bid_ammount)
-                : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: art.isBiddingOpen
-                  ? AppColors.primary
-                  : Colors.grey.shade400,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
+      bottomSheet: Obx(() {
+        final currentUserId = authCtrl.currentUser.value?.id;
+        final isWinner =
+            art.isBiddingClosed &&
+            bidCtrl.winnerUserId != null &&
+            bidCtrl.winnerUserId == currentUserId;
+
+        final alreadyPaid =
+            isWinner &&
+            bidCtrl.winnerBidId != null &&
+            payCtrl.payments.any((p) => p.bidId == bidCtrl.winnerBidId);
+
+        return Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 28),
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primaryDark.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -5),
               ),
-              elevation: art.isBiddingOpen ? 4 : 0,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  art.isBiddingOpen ? Icons.gavel : Icons.block,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 10),
-                Text(
-                  art.isBiddingOpen ? 'Pasang Bid' : 'Lelang Ditutup',
-                  style: GoogleFonts.outfit(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
+            ],
+          ),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: _buildBottomButton(
+              context: context,
+              art: art,
+              isWinner: isWinner,
+              alreadyPaid: alreadyPaid,
+              bidCtrl: bidCtrl,
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -604,9 +635,150 @@ class DetailPage extends StatelessWidget {
     ),
   );
 
+  Widget _buildBottomButton({
+    required BuildContext context,
+    required ArtworkModel art,
+    required bool isWinner,
+    required bool alreadyPaid,
+    required BiddingController bidCtrl,
+  }) {
+    //  Bidding masih buka
+    if (art.isBiddingOpen) {
+      return ElevatedButton(
+        onPressed: () => _showBidDialog(context, art.id, art.min_bid_ammount),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          elevation: 4,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.gavel, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(
+              'Pasang Bid',
+              style: GoogleFonts.outfit(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // =Lelang ditutup + user menang + sudah bayar
+    if (isWinner && alreadyPaid) {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.success,
+          disabledBackgroundColor: AppColors.success,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(
+              'Sudah Dibayar ✓',
+              style: GoogleFonts.outfit(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // S=Lelang ditutup + user menang + belum di-validasi
+    if (isWinner && !alreadyPaid) {
+      final payCtrl = Get.find<PaymentController>();
+      return Obx(() => ElevatedButton(
+        onPressed: payCtrl.isCreating.value
+            ? null
+            : () async {
+                final winBid = bidCtrl.winnerBid!;
+                await payCtrl.createPayment(winBid.id, winBid.amount);
+              },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.accentDark,
+          disabledBackgroundColor: AppColors.accentDark.withValues(alpha: 0.5),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
+          elevation: 4,
+        ),
+        child: payCtrl.isCreating.value
+            ? const SizedBox(
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Colors.white,
+                ),
+              )
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.verified_rounded, color: Colors.white),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Validasi Pembayaran',
+                    style: GoogleFonts.outfit(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+      ));
+    }
+
+    //  Lelang ditutup + bukan pemenang
+    return ElevatedButton(
+      onPressed: null,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.grey.shade400,
+        disabledBackgroundColor: Colors.grey.shade400,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        elevation: 0,
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.block, color: Colors.white),
+          const SizedBox(width: 10),
+          Text(
+            'Lelang Berakhir',
+            style: GoogleFonts.outfit(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showBidDialog(BuildContext ctx, String artId, int minBid) {
     final ctrl = TextEditingController();
     final bidCtrl = Get.find<BiddingController>();
+    final walletCtrl = Get.find<WalletController>();
+    walletCtrl.loadBalance();
+
     Get.bottomSheet(
       Container(
         padding: const EdgeInsets.all(28),
@@ -645,7 +817,64 @@ class DetailPage extends StatelessWidget {
                 color: AppColors.textHint,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 12),
+            Obx(() => Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.account_balance_wallet_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 10),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Saldo E-Wallet',
+                        style: GoogleFonts.outfit(
+                          fontSize: 11,
+                          color: AppColors.textHint,
+                        ),
+                      ),
+                      Text(
+                        'Rp ${_fmt(walletCtrl.balance.value)}',
+                        style: GoogleFonts.outfit(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.info.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      'Auto-deduct',
+                      style: GoogleFonts.outfit(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.info,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            const SizedBox(height: 16),
             TextField(
               controller: ctrl,
               keyboardType: TextInputType.number,
@@ -658,7 +887,16 @@ class DetailPage extends StatelessWidget {
                 hintText: '${minBid + 100000}',
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 6),
+            Text(
+              '* Saldo wallet akan dikurangi otomatis saat bid. Jika disalip, saldo dikembalikan.',
+              style: GoogleFonts.outfit(
+                fontSize: 11,
+                color: AppColors.textHint,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               height: 56,

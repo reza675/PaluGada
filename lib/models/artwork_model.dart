@@ -2,6 +2,7 @@ class ArtworkModel {
   final String id;
   final String nama_karya;
   final String artistId;
+  final String artistName;
   final String? ownerId;
   final String deskripsi;
   final String imageUrl;
@@ -22,6 +23,7 @@ class ArtworkModel {
     required this.id,
     required this.nama_karya,
     this.artistId = '',
+    this.artistName = '',
     this.ownerId,
     this.deskripsi = '',
     this.imageUrl = '',
@@ -51,10 +53,24 @@ class ArtworkModel {
       catch (_) { return null; }
     }
 
+    String parseArtistName(Map<String, dynamic> j) {
+      final artistObj = j['artist'];
+      if (artistObj is Map<String, dynamic>) {
+        final altName = artistObj['alt_name']?.toString() ?? '';
+        final fullName = artistObj['full_name']?.toString() ?? '';
+        if (altName.isNotEmpty) return altName;
+        if (fullName.isNotEmpty) return fullName;
+      }
+      return '';
+    }
+
     return ArtworkModel(
       id: json['id'] ?? '',
       nama_karya: json['nama_karya'] ?? '',
       artistId: json['artistId'] ?? '',
+      artistName: (json['artistName']?.toString() ?? '').isNotEmpty
+          ? json['artistName'].toString()
+          : parseArtistName(json),
       ownerId: json['ownerId'],
       deskripsi: json['deskripsi'] ?? '',
       imageUrl: json['image_url'] ?? json['imageUrl'] ?? '',
@@ -80,6 +96,7 @@ class ArtworkModel {
       'id': id,
       'nama_karya': nama_karya,
       'artistId': artistId,
+      'artistName': artistName,
       'ownerId': ownerId,
       'deskripsi': deskripsi,
       'imageUrl': imageUrl,
@@ -102,6 +119,7 @@ class ArtworkModel {
     String? id,
     String? nama_karya,
     String? artistId,
+    String? artistName,
     String? ownerId,
     String? deskripsi,
     String? imageUrl,
@@ -122,6 +140,7 @@ class ArtworkModel {
       id: id ?? this.id,
       nama_karya: nama_karya ?? this.nama_karya,
       artistId: artistId ?? this.artistId,
+      artistName: artistName ?? this.artistName,
       ownerId: ownerId ?? this.ownerId,
       deskripsi: deskripsi ?? this.deskripsi,
       imageUrl: imageUrl ?? this.imageUrl,

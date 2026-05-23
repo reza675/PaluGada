@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../models/artwork_model.dart';
 import '../services/api_service.dart';
@@ -11,13 +12,8 @@ class CatalogController extends GetxController {
   final selectedCategory = 'Semua'.obs;
   final categories = [
     'Semua',
-    'Lukisan',
-    'Patung',
-    'Fotografi',
-    'Digital Art',
-    'Keramik',
+    'Clasic',
     'Modern',
-    'Classic',
   ].obs;
 
   @override
@@ -32,7 +28,6 @@ class CatalogController extends GetxController {
       final response = await _api.get('/karya-seni/all');
       final dataList = _extractList(response);
 
-      // Hitung total bid dari endpoint /bid tanpa mengubah backend
       Map<String, int> bidCounts = {};
       try {
         final bidResponse = await _api.get('/bid');
@@ -44,7 +39,7 @@ class CatalogController extends GetxController {
           }
         }
       } catch (_) {
-        // Abaikan jika gagal memuat history bid (misal saat belum login)
+        // Abaikan jika gagal memuat history
       }
 
       final mapped = dataList.map((json) {
@@ -56,10 +51,24 @@ class CatalogController extends GetxController {
 
       artworks.assignAll(mapped);
       filteredArtworks.assignAll(mapped);
+      await fetchUserWishlist();
+
+      _fetchArtistNamesBackground();
     } catch (error) {
       Get.snackbar('Gagal memuat', error.toString());
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _fetchArtistNamesBackground() async {
+    for (int i = 0; i < artworks.length; i++) {
+      if (artworks[i].artistName.isEmpty) {
+        try {
+          final detail = await fetchArtworkDetail(artworks[i].id);
+          _applyFilters();
+        } catch (_) {}
+      }
     }
   }
 
@@ -112,15 +121,86 @@ class CatalogController extends GetxController {
     }
   }
 
-  void toggleWatchlist(String artworkId) {
-    final index = artworks.indexWhere((a) => a.id == artworkId);
-    if (index != -1) {
-      final artwork = artworks[index];
-      artworks[index] = artwork.copyWith(isInWatchlist: !artwork.isInWatchlist);
-      _applyFilters();
+Future<void> toggleWatchlist(String id) async {
+    final index = artworks.indexWhere((a) => a.id == id);
+    if (index == -1) return;
+
+    final artwork = artworks[index];
+    final currentStatus = artwork.isInWatchlist;
+    final newStatus = !currentStatus;
+    artworks[index] = artwork.copyWith(isInWatchlist: newStatus);
+
+    // Kirim perubahan ke Backend
+    try {
+      if (newStatus) {
+        await _api.addToWishlist(id);
+        Get.snackbar(
+          'Sukses', 
+          'Ditambahkan ke Watchlist', 
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        await _api.removeFromWishlist(id);
+        Get.snackbar(
+          'Dihapus', 
+          'Dihapus dari Watchlist', 
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      artworks[index] = artwork.copyWith(isInWatchlist: currentStatus);
+      Get.snackbar(
+        'Gagal', 
+        'Terjadi kesalahan saat menyimpan wishlist',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
+  }
+
+  Future<void> fetchUserWishlist() async {
+    try {
+      final wishlistData = await _api.getWishlist();
+      
+      final wishlistIds = wishlistData.map((e) => e['id'].toString()).toList();
+
+      for (int i = 0; i < artworks.length; i++) {
+        if (wishlistIds.contains(artworks[i].id)) {
+          artworks[i] = artworks[i].copyWith(isInWatchlist: true);
+        } else {
+          artworks[i] = artworks[i].copyWith(isInWatchlist: false);
+        }
+      }
+    } catch (e) {
+      print("Error memuat wishlist: $e");
     }
   }
 
   List<ArtworkModel> get watchlistItems =>
       artworks.where((a) => a.isInWatchlist).toList();
+
+  Future<ArtworkModel?> fetchArtworkDetail(String id) async {
+    try {
+      final response = await _api.get('/karya-seni/$id');
+      if (response is Map<String, dynamic>) {
+        final detail = ArtworkModel.fromJson(response);
+        final idx = artworks.indexWhere((a) => a.id == id);
+        if (idx != -1) {
+          artworks[idx] = detail.copyWith(
+            isInWatchlist: artworks[idx].isInWatchlist,
+            totalBids: artworks[idx].totalBids,
+          );
+        }
+        return detail;
+      }
+    } catch (e) {
+      print('fetchArtworkDetail error: $e');
+    }
+    return null;
+  }
 }
+

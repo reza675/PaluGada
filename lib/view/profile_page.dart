@@ -135,6 +135,22 @@ class ProfilePage extends StatelessWidget {
                     ),
                     const Divider(height: 30),
                     Text(
+                      'Keuangan',
+                      style: GoogleFonts.outfit(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    _menu(
+                      Icons.account_balance_wallet_rounded,
+                      'E-Wallet',
+                      () => Get.toNamed(AppRoutes.wallet),
+                      subtitle: 'Top Up & kelola saldo',
+                    ),
+                    const Divider(height: 30),
+                    Text(
                       'Lainnya',
                       style: GoogleFonts.outfit(
                         fontSize: 13,

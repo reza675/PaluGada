@@ -5,6 +5,8 @@ import '../theme/app_colors.dart';
 import '../controllers/home_controller.dart';
 import '../controllers/catalog_controller.dart';
 import '../controllers/auth_controller.dart';
+import '../controllers/notification_controller.dart';
+import '../routes/app_routes.dart';
 import 'catalog_page.dart';
 import 'watchlist_page.dart';
 import 'payment_page.dart';
@@ -111,6 +113,7 @@ class _HomeDashboard extends StatelessWidget {
     final authCtrl = Get.find<AuthController>();
     final catCtrl = Get.find<CatalogController>();
     final homeCtrl = Get.find<HomeController>();
+    final notifCtrl = Get.find<NotificationController>();
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -124,7 +127,6 @@ class _HomeDashboard extends StatelessWidget {
             parent: AlwaysScrollableScrollPhysics(),
           ),
           slivers: [
-            // Hero Header
             SliverToBoxAdapter(
               child: Container(
                 padding: EdgeInsets.only(
@@ -172,13 +174,66 @@ class _HomeDashboard extends StatelessWidget {
                           ),
                         ),
                         GestureDetector(
-                          onTap: () => homeCtrl.changeTab(4),
-                          child: Container(
-                            width: 52,
-                            height: 52,
+                          onTap: () => Get.toNamed(AppRoutes.notifications),
+                          child: Obx(() => Container(
+                            width: 46,
+                            height: 46,
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(18),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: Colors.white.withValues(alpha: 0.3),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                const Icon(
+                                  Icons.notifications_outlined,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                                if (notifCtrl.unreadCount > 0)
+                                  Positioned(
+                                    top: 8,
+                                    right: 8,
+                                    child: Container(
+                                      width: 16,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.error,
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: Colors.white,
+                                          width: 1.5,
+                                        ),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '${notifCtrl.unreadCount}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          )),
+                        ),
+                        const SizedBox(width: 8),
+                        GestureDetector(
+                          onTap: () => homeCtrl.changeTab(4),
+                          child: Container(
+                            width: 46,
+                            height: 46,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.2),
+                              borderRadius: BorderRadius.circular(16),
                               border: Border.all(
                                 color: Colors.white.withValues(alpha: 0.3),
                                 width: 1.5,
@@ -187,7 +242,7 @@ class _HomeDashboard extends StatelessWidget {
                             child: const Icon(
                               Icons.person,
                               color: Colors.white,
-                              size: 28,
+                              size: 24,
                             ),
                           ),
                         ),
@@ -232,7 +287,6 @@ class _HomeDashboard extends StatelessWidget {
               ),
             ),
 
-            // Stats
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.all(20),
@@ -271,7 +325,7 @@ class _HomeDashboard extends StatelessWidget {
               ),
               ),
             ),
-            // Karya Unggulan
+
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -291,14 +345,12 @@ class _HomeDashboard extends StatelessWidget {
               ),
             ),
 
-            // Horizontal list
             SliverToBoxAdapter(
               child: SizedBox(
                 height: 300,
                 child: Obx(() {
                   final now = DateTime.now();
 
-                  // cari yang waktu bid-nya masih berjalan
                   var featuredItems = catCtrl.artworks
                       .where(
                         (a) =>
@@ -308,7 +360,6 @@ class _HomeDashboard extends StatelessWidget {
                       )
                       .toList();
 
-                  // Jika kosong (untuk testing/melihat hasil), tampilkan yang sudah berakhir
                   if (featuredItems.isEmpty) {
                     featuredItems = catCtrl.artworks
                         .where(

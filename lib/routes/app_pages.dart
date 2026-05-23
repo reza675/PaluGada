@@ -7,6 +7,9 @@ import '../view/home_page.dart';
 import '../view/detail_page.dart';
 import '../view/bidding_page.dart';
 import '../view/edit_profile_page.dart';
+import '../view/notification_page.dart';
+import '../view/payment_detail_page.dart';
+import '../view/wallet_page.dart';
 
 class AppPages {
   static final pages = [
@@ -39,6 +42,21 @@ class AppPages {
     GetPage(
       name: AppRoutes.editProfile,
       page: () => EditProfilePage(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.notifications,
+      page: () => const NotificationPage(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.paymentDetail,
+      page: () => const PaymentDetailPage(),
+      transition: Transition.rightToLeft,
+    ),
+    GetPage(
+      name: AppRoutes.wallet,
+      page: () => const WalletPage(),
       transition: Transition.rightToLeft,
     ),
   ];

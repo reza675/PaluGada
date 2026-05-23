@@ -6,7 +6,6 @@ import '../models/artwork_model.dart';
 import '../controllers/catalog_controller.dart';
 import '../routes/app_routes.dart';
 
-/// Widget reusable untuk menampilkan card karya seni
 class ArtworkCard extends StatelessWidget {
   final ArtworkModel artwork;
   final bool isCompact;
@@ -159,7 +158,7 @@ class ArtworkCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    artwork.artistId,
+                    artwork.artistName.isNotEmpty ? artwork.artistName : 'ID: ${artwork.artistId}',
                     style: GoogleFonts.outfit(
                       fontSize: 11,
                       color: AppColors.textHint,
@@ -332,7 +331,7 @@ class ArtworkCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'ID: ${artwork.artistId}',
+                      artwork.artistName.isNotEmpty ? artwork.artistName : 'ID: ${artwork.artistId}',
                       style: GoogleFonts.outfit(
                         fontSize: 12,
                         color: AppColors.textHint,

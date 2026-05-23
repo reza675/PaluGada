@@ -73,7 +73,6 @@ class LoginPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 40),
 
-                // Login Card
                 Container(
                   padding: const EdgeInsets.all(28),
                   decoration: BoxDecoration(

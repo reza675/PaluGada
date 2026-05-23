@@ -117,6 +117,26 @@ class ApiService extends GetxService {
     _ensureSuccess(response);
     return _decodeResponse(response);
   }
+
+  /// wishlist
+  Future<List<dynamic>> getWishlist() async {
+    final response = await get('/wishlisht');
+
+    if (response != null &&
+        response is Map &&
+        response.containsKey('wishlist')) {
+      return response['wishlist'] ?? [];
+    }
+    return [];
+  }
+
+  Future<void> addToWishlist(String artworkId) async {
+    await post('/wishlisht', body: {'artworkId': artworkId});
+  }
+
+  Future<void> removeFromWishlist(String artworkId) async {
+    await delete('/wishlisht/$artworkId');
+  }
 }
 
 class ApiException implements Exception {
