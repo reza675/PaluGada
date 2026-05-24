@@ -165,14 +165,18 @@ class ArtworkModel {
     );
   }
 
-// Cek lelang masih berlangsung
+  // Cek lelang masih berlangsung
   bool get isBiddingOpen {
-    if (open_bid_time == null || close_bid_time == null) return false;
+    if (close_bid_time == null) return false;
     final now = DateTime.now();
+    // Jika open_bid_time tidak diset, anggap lelang langsung dibuka
+    if (open_bid_time == null) {
+      return now.isBefore(close_bid_time!);
+    }
     return now.isAfter(open_bid_time!) && now.isBefore(close_bid_time!);
   }
 
-// Cek lelang sudah ditutup
+  // Cek lelang sudah ditutup
   bool get isBiddingClosed {
     if (close_bid_time == null) return false;
     final now = DateTime.now();

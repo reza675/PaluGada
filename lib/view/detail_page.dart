@@ -746,6 +746,34 @@ class _DetailPageState extends State<DetailPage> {
       ));
     }
 
+    // Jika lelang belum dimulai
+    if (art.open_bid_time != null && DateTime.now().isBefore(art.open_bid_time!)) {
+      return ElevatedButton(
+        onPressed: null,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.grey.shade400,
+          disabledBackgroundColor: Colors.grey.shade400,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          elevation: 0,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.access_time_filled, color: Colors.white),
+            const SizedBox(width: 10),
+            Text(
+              'Lelang Belum Dimulai',
+              style: GoogleFonts.outfit(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
     //  Lelang ditutup + bukan pemenang
     return ElevatedButton(
       onPressed: null,

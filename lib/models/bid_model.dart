@@ -25,7 +25,9 @@ class BidModel {
           ? json['amount']
           : int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
       bidById: json['bidById'] ?? '',
-      bidderName: json['bidderName'] ?? json['bidById'] ?? '',
+      bidderName: json['bidBy'] != null && json['bidBy'] is Map 
+          ? (json['bidBy']['username'] ?? json['bidBy']['full_name'] ?? json['bidderName'] ?? json['bidById'] ?? '')
+          : (json['bidderName'] ?? json['bidById'] ?? ''),
       status: json['status'] ?? 'OPEN',
       timestamp: json['timestamp'] != null
           ? DateTime.parse(json['timestamp'])

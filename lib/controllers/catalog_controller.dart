@@ -45,11 +45,19 @@ class CatalogController extends GetxController {
         return ArtworkModel.fromJson(data);
       }).toList();
 
-      // Hanya tampilkan artwork yang sudah diverifikasi untuk dilelang
       final verifiedArtworks = mapped.where((a) => a.verification_status == 'VERIFIED').toList();
 
       artworks.assignAll(verifiedArtworks);
       filteredArtworks.assignAll(verifiedArtworks);
+      
+      final uniqueCategories = verifiedArtworks
+          .map((a) => a.katalog)
+          .where((k) => k.isNotEmpty)
+          .toSet()
+          .toList();
+      uniqueCategories.sort();
+      categories.assignAll(['Semua', ...uniqueCategories]);
+
       await fetchUserWishlist();
 
       _fetchArtistNamesBackground();
