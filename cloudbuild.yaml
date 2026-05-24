@@ -1,11 +1,11 @@
 steps:
   # Step 1: Install dependencies
-  - name: "node:20"
+  - name: "node:24"
     entrypoint: "npm"
     args: ["install"]
 
   # Step 2: Build the React/Vite app to generate the 'dist' folder
-  - name: "node:20"
+  - name: "node:24"
     entrypoint: "npm"
     args: ["run", "build"]
 
