@@ -44,12 +44,21 @@ class BiddingController extends GetxController {
       ? bids.map((b) => b.amount.toDouble()).reduce((a, b) => a < b ? a : b)
       : 0;
 
-  /// Bid pemenang
+  /// Bid pemenang 
   BidModel? get winnerBid {
+    if (bids.isEmpty) return null;
+    // Cek status 'TERTINGGI'
+    final tertinggi = bids.where((b) => b.status == 'TERTINGGI').toList();
+    if (tertinggi.isNotEmpty) {
+      tertinggi.sort((a, b) => b.amount.compareTo(a.amount));
+      return tertinggi.first;
+    }
     final openBids = bids.where((b) => b.status == 'OPEN').toList();
-    if (openBids.isEmpty) return null;
-    openBids.sort((a, b) => b.amount.compareTo(a.amount));
-    return openBids.first;
+    if (openBids.isNotEmpty) {
+      openBids.sort((a, b) => b.amount.compareTo(a.amount));
+      return openBids.first;
+    }
+    return bids.first;
   }
   
   String? get winnerBidId => winnerBid?.id;

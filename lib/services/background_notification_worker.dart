@@ -92,8 +92,14 @@ Future<void> _checkAndPushNotifications() async {
 
 String _deriveTitle(String message) {
   final lower = message.toLowerCase();
-  if (lower.contains('outbid') || lower.contains('highest bid')) {
+  if (lower.contains('outbid') || lower.contains('highest bid') || lower.contains('dilewati') || lower.contains('disalip')) {
     return 'Penawaran Anda Disalip!';
+  }
+  if (lower.contains('menang') || lower.contains('pemenang') || lower.contains('winner') || lower.contains('won') || lower.contains('selamat')) {
+    return 'Selamat, Anda Pemenang!';
+  }
+  if (lower.contains('pembayaran') || lower.contains('payment') || lower.contains('bayar')) {
+    return 'Pembayaran Berhasil';
   }
   return 'Notifikasi Lelang';
 }

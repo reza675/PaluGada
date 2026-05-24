@@ -10,11 +10,7 @@ class CatalogController extends GetxController {
   final isLoading = false.obs;
   final searchQuery = ''.obs;
   final selectedCategory = 'Semua'.obs;
-  final categories = [
-    'Semua',
-    'Clasic',
-    'Modern',
-  ].obs;
+  final categories = ['Semua', 'Clasic', 'Modern'].obs;
 
   @override
   void onInit() {
@@ -49,8 +45,11 @@ class CatalogController extends GetxController {
         return ArtworkModel.fromJson(data);
       }).toList();
 
-      artworks.assignAll(mapped);
-      filteredArtworks.assignAll(mapped);
+      // Hanya tampilkan artwork yang sudah diverifikasi untuk dilelang
+      final verifiedArtworks = mapped.where((a) => a.verification_status == 'VERIFIED').toList();
+
+      artworks.assignAll(verifiedArtworks);
+      filteredArtworks.assignAll(verifiedArtworks);
       await fetchUserWishlist();
 
       _fetchArtistNamesBackground();
@@ -121,7 +120,7 @@ class CatalogController extends GetxController {
     }
   }
 
-Future<void> toggleWatchlist(String id) async {
+  Future<void> toggleWatchlist(String id) async {
     final index = artworks.indexWhere((a) => a.id == id);
     if (index == -1) return;
 
@@ -135,8 +134,8 @@ Future<void> toggleWatchlist(String id) async {
       if (newStatus) {
         await _api.addToWishlist(id);
         Get.snackbar(
-          'Sukses', 
-          'Ditambahkan ke Watchlist', 
+          'Sukses',
+          'Ditambahkan ke Watchlist',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.green,
           colorText: Colors.white,
@@ -144,8 +143,8 @@ Future<void> toggleWatchlist(String id) async {
       } else {
         await _api.removeFromWishlist(id);
         Get.snackbar(
-          'Dihapus', 
-          'Dihapus dari Watchlist', 
+          'Dihapus',
+          'Dihapus dari Watchlist',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.orange,
           colorText: Colors.white,
@@ -154,7 +153,7 @@ Future<void> toggleWatchlist(String id) async {
     } catch (e) {
       artworks[index] = artwork.copyWith(isInWatchlist: currentStatus);
       Get.snackbar(
-        'Gagal', 
+        'Gagal',
         'Terjadi kesalahan saat menyimpan wishlist',
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -165,7 +164,7 @@ Future<void> toggleWatchlist(String id) async {
   Future<void> fetchUserWishlist() async {
     try {
       final wishlistData = await _api.getWishlist();
-      
+
       final wishlistIds = wishlistData.map((e) => e['id'].toString()).toList();
 
       for (int i = 0; i < artworks.length; i++) {
@@ -203,4 +202,3 @@ Future<void> toggleWatchlist(String id) async {
     return null;
   }
 }
-

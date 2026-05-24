@@ -418,9 +418,7 @@ class _HomeDashboard extends StatelessWidget {
             ),
 
             Obx(() {
-              final items = catCtrl.artworks
-                  .where((a) => a.verification_status == 'UNVERIFIED')
-                  .toList();
+              final items = catCtrl.artworks.toList();
               return SliverList(
                 delegate: SliverChildBuilderDelegate(
                   (_, i) => Padding(

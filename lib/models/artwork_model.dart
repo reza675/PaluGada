@@ -49,8 +49,14 @@ class ArtworkModel {
 
     DateTime? parseDate(dynamic value) {
       if (value == null) return null;
-      try { return DateTime.parse(value.toString()); }
-      catch (_) { return null; }
+      try {
+        String raw = value.toString();
+        raw = raw.replaceAll('Z', '').replaceAll('z', '');
+        raw = raw.replaceAll(RegExp(r'[+-]\d{2}:\d{2}$'), '');
+        return DateTime.parse(raw);
+      } catch (_) {
+        return null;
+      }
     }
 
     String parseArtistName(Map<String, dynamic> j) {
@@ -162,16 +168,14 @@ class ArtworkModel {
 // Cek lelang masih berlangsung
   bool get isBiddingOpen {
     if (open_bid_time == null || close_bid_time == null) return false;
-    
-    final now = DateTime.now().toUtc(); 
-    
+    final now = DateTime.now();
     return now.isAfter(open_bid_time!) && now.isBefore(close_bid_time!);
   }
 
 // Cek lelang sudah ditutup
   bool get isBiddingClosed {
     if (close_bid_time == null) return false;
-    final now = DateTime.now().toUtc();
+    final now = DateTime.now();
     return now.isAfter(close_bid_time!);
   }
 }
