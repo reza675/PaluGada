@@ -12,7 +12,7 @@ export default function Input({
   disabled = false,
   className = '',
   rows,
-  options, // for select
+  options,
   ...props
 }) {
   const [focused, setFocused] = useState(false);

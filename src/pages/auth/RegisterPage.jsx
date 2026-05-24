@@ -3,13 +3,20 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { APP_NAME } from '../../utils/constants';
+import { APP_NAME, ROLES } from '../../utils/constants';
 
 export default function RegisterPage() {
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    full_name: '', username: '', email: '', password: '', confirmPassword: '', bio: '',
+    full_name: '',
+    username: '',
+    email: '',
+    phone_number: '',
+    password: '',
+    confirmPassword: '',
+    role: ROLES.SENIMAN,
+    alt_name: '',
   });
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -19,6 +26,7 @@ export default function RegisterPage() {
     if (!formData.full_name.trim()) e.full_name = 'Nama lengkap wajib diisi';
     if (!formData.username.trim()) e.username = 'Username wajib diisi';
     if (!formData.email.trim()) e.email = 'Email wajib diisi';
+    if (!formData.phone_number.trim()) e.phone_number = 'Nomor telepon wajib diisi';
     if (!formData.password) e.password = 'Password wajib diisi';
     else if (formData.password.length < 6) e.password = 'Password minimal 6 karakter';
     if (formData.password !== formData.confirmPassword) e.confirmPassword = 'Password tidak cocok';
@@ -30,9 +38,24 @@ export default function RegisterPage() {
     e.preventDefault();
     setServerError('');
     if (!validate()) return;
-    const result = await register(formData);
+
+    const result = await register({
+      username: formData.username,
+      full_name: formData.full_name,
+      email: formData.email,
+      phone_number: formData.phone_number,
+      password: formData.password,
+      role: formData.role,
+      alt_name: formData.alt_name || undefined,
+    });
+
     if (result.success) {
-      navigate('/artist/dashboard');
+      const role = result.user?.role;
+      if (role === ROLES.KURATOR) {
+        navigate('/curator/dashboard');
+      } else {
+        navigate('/artist/dashboard');
+      }
     } else {
       setServerError(result.error);
     }
@@ -54,7 +77,7 @@ export default function RegisterPage() {
         </div>
         <div className="relative z-10 flex flex-col justify-center px-16">
           <h1 className="text-5xl font-bold font-serif text-surface-50 mb-4">{APP_NAME}</h1>
-          <p className="text-xl text-surface-300 mb-8">Bergabung Sebagai Seniman</p>
+          <p className="text-xl text-surface-300 mb-8">Bergabung Bersama Kami</p>
           <div className="space-y-4 text-surface-400">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-lg bg-primary-600/20 flex items-center justify-center">
@@ -82,7 +105,7 @@ export default function RegisterPage() {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-surface-900">
         <div className="w-full max-w-md animate-fade-in">
           <h2 className="text-2xl font-bold text-surface-50 mb-2">Buat Akun Baru</h2>
-          <p className="text-surface-400 mb-8">Daftar sebagai seniman di {APP_NAME}</p>
+          <p className="text-surface-400 mb-8">Daftar di {APP_NAME}</p>
 
           {serverError && (
             <div className="mb-6 px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">{serverError}</div>
@@ -92,9 +115,22 @@ export default function RegisterPage() {
             <Input id="full_name" label="Nama Lengkap" placeholder="Nama lengkap Anda" value={formData.full_name} onChange={handleChange('full_name')} error={errors.full_name} required />
             <Input id="username" label="Username" placeholder="username_anda" value={formData.username} onChange={handleChange('username')} error={errors.username} required />
             <Input id="email" label="Email" type="email" placeholder="email@contoh.com" value={formData.email} onChange={handleChange('email')} error={errors.email} required />
+            <Input id="phone_number" label="Nomor Telepon" placeholder="08123456789" value={formData.phone_number} onChange={handleChange('phone_number')} error={errors.phone_number} required />
             <Input id="password" label="Password" type="password" placeholder="Minimal 6 karakter" value={formData.password} onChange={handleChange('password')} error={errors.password} required />
             <Input id="confirmPassword" label="Konfirmasi Password" type="password" placeholder="Ulangi password" value={formData.confirmPassword} onChange={handleChange('confirmPassword')} error={errors.confirmPassword} required />
-            <Input id="bio" label="Bio (opsional)" type="textarea" placeholder="Ceritakan sedikit tentang Anda..." value={formData.bio} onChange={handleChange('bio')} rows={3} />
+            <Input
+              id="role"
+              label="Daftar Sebagai"
+              type="select"
+              value={formData.role}
+              onChange={handleChange('role')}
+              options={[
+                { value: ROLES.SENIMAN, label: '🎨 Seniman' },
+                { value: ROLES.KURATOR, label: '🔍 Kurator' },
+                { value: ROLES.KOLEKTOR, label: '🖼️ Kolektor' },
+              ]}
+            />
+            <Input id="alt_name" label="Nama Alias (opsional)" placeholder="Nama samaran untuk karya seni" value={formData.alt_name} onChange={handleChange('alt_name')} />
             <Button type="submit" fullWidth loading={isLoading} size="lg">Daftar</Button>
           </form>
 

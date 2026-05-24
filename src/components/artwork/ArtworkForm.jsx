@@ -1,53 +1,60 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Input from '../common/Input';
 import Button from '../common/Button';
-import categories from '../../data/categories';
 
 export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading }) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category_id: '',
-    medium: '',
-    dimensions: '',
-    year_created: new Date().getFullYear(),
-    image_url: '',
-    starting_price: '',
+    nama_karya: '',
+    deskripsi: '',
+    katalog: '',
+    tags: '',
+    min_bid_ammount: '',
+    open_bid_time: '',
+    close_bid_time: '',
   });
 
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [errors, setErrors] = useState({});
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (initialData) {
       setFormData({
-        title: initialData.title || '',
-        description: initialData.description || '',
-        category_id: initialData.category_id?.toString() || '',
-        medium: initialData.medium || '',
-        dimensions: initialData.dimensions || '',
-        year_created: initialData.year_created || new Date().getFullYear(),
-        image_url: initialData.image_url || '',
-        starting_price: initialData.starting_price?.toString() || '',
+        nama_karya: initialData.nama_karya || '',
+        deskripsi: initialData.deskripsi || '',
+        katalog: initialData.katalog || '',
+        tags: initialData.tags || '',
+        min_bid_ammount: initialData.min_bid_ammount?.toString() || '',
+        open_bid_time: initialData.open_bid_time ? initialData.open_bid_time.slice(0, 16) : '',
+        close_bid_time: initialData.close_bid_time ? initialData.close_bid_time.slice(0, 16) : '',
       });
+      if (initialData.image_url) {
+        setImagePreview(initialData.image_url);
+      }
     }
   }, [initialData]);
 
   const handleChange = (field) => (e) => {
     setFormData((prev) => ({ ...prev, [field]: e.target.value }));
-    // Clear error on change
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
   const validate = () => {
     const newErrors = {};
-    if (!formData.title.trim()) newErrors.title = 'Judul wajib diisi';
-    if (!formData.description.trim()) newErrors.description = 'Deskripsi wajib diisi';
-    if (!formData.category_id) newErrors.category_id = 'Kategori wajib dipilih';
-    if (!formData.medium.trim()) newErrors.medium = 'Medium wajib diisi';
-    if (!formData.starting_price || Number(formData.starting_price) <= 0)
-      newErrors.starting_price = 'Harga awal harus lebih dari 0';
+    if (!formData.nama_karya.trim()) newErrors.nama_karya = 'Nama karya wajib diisi';
+    if (!formData.min_bid_ammount || Number(formData.min_bid_ammount) <= 0)
+      newErrors.min_bid_ammount = 'Minimum bid harus lebih dari 0';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -56,119 +63,126 @@ export default function ArtworkForm({ initialData, onSubmit, onCancel, isLoading
     e.preventDefault();
     if (!validate()) return;
 
-    onSubmit({
-      ...formData,
-      category_id: Number(formData.category_id),
-      year_created: Number(formData.year_created),
-      starting_price: Number(formData.starting_price),
-      image_url: formData.image_url || `https://picsum.photos/seed/${Date.now()}/800/600`,
-    });
+    onSubmit(
+      {
+        nama_karya: formData.nama_karya,
+        deskripsi: formData.deskripsi || null,
+        katalog: formData.katalog || null,
+        tags: formData.tags || null,
+        min_bid_ammount: Number(formData.min_bid_ammount),
+        open_bid_time: formData.open_bid_time ? formData.open_bid_time + ":00.000Z" : null,
+        close_bid_time: formData.close_bid_time ? formData.close_bid_time + ":00.000Z" : null,
+      },
+      imageFile
+    );
   };
-
-  const categoryOptions = categories.map((c) => ({
-    value: c.id.toString(),
-    label: c.name,
-  }));
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5" id="artwork-form">
       <Input
-        id="title"
-        label="Judul Karya"
-        placeholder="Masukkan judul karya seni"
-        value={formData.title}
-        onChange={handleChange('title')}
-        error={errors.title}
+        id="nama_karya"
+        label="Nama Karya"
+        placeholder="Masukkan nama karya seni"
+        value={formData.nama_karya}
+        onChange={handleChange('nama_karya')}
+        error={errors.nama_karya}
         required
       />
 
       <Input
-        id="description"
+        id="deskripsi"
         label="Deskripsi"
         type="textarea"
         placeholder="Ceritakan tentang karya seni ini..."
-        value={formData.description}
-        onChange={handleChange('description')}
-        error={errors.description}
+        value={formData.deskripsi}
+        onChange={handleChange('deskripsi')}
         rows={4}
-        required
       />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
         <Input
-          id="category_id"
-          label="Kategori"
-          type="select"
-          value={formData.category_id}
-          onChange={handleChange('category_id')}
-          error={errors.category_id}
-          options={categoryOptions}
-          placeholder="Pilih kategori"
-          required
+          id="katalog"
+          label="Katalog"
+          placeholder="Contoh: Modern, Klasik"
+          value={formData.katalog}
+          onChange={handleChange('katalog')}
         />
 
         <Input
-          id="medium"
-          label="Medium / Teknik"
-          placeholder="Contoh: Cat Minyak di Kanvas"
-          value={formData.medium}
-          onChange={handleChange('medium')}
-          error={errors.medium}
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-        <Input
-          id="dimensions"
-          label="Dimensi"
-          placeholder="Contoh: 120 x 80 cm"
-          value={formData.dimensions}
-          onChange={handleChange('dimensions')}
-        />
-
-        <Input
-          id="year_created"
-          label="Tahun Pembuatan"
-          type="number"
-          placeholder="2025"
-          value={formData.year_created}
-          onChange={handleChange('year_created')}
+          id="tags"
+          label="Tags (pisahkan dengan koma)"
+          placeholder="Contoh: oil,canvas,sunset"
+          value={formData.tags}
+          onChange={handleChange('tags')}
         />
       </div>
 
       <Input
-        id="starting_price"
-        label="Harga Awal Lelang (Rp)"
+        id="min_bid_ammount"
+        label="Minimum Bid (Rp)"
         type="number"
-        placeholder="15000000"
-        value={formData.starting_price}
-        onChange={handleChange('starting_price')}
-        error={errors.starting_price}
+        placeholder="1000000"
+        value={formData.min_bid_ammount}
+        onChange={handleChange('min_bid_ammount')}
+        error={errors.min_bid_ammount}
         required
       />
 
-      <Input
-        id="image_url"
-        label="URL Gambar"
-        placeholder="https://... (kosongkan untuk placeholder)"
-        value={formData.image_url}
-        onChange={handleChange('image_url')}
-      />
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        <Input
+          id="open_bid_time"
+          label="Waktu Buka Bid"
+          type="datetime-local"
+          value={formData.open_bid_time}
+          onChange={handleChange('open_bid_time')}
+        />
 
-      {/* Image preview */}
-      {(formData.image_url || initialData?.image_url) && (
-        <div className="rounded-xl overflow-hidden border border-surface-600/30">
-          <img
-            src={formData.image_url || initialData?.image_url}
-            alt="Preview"
-            className="w-full h-40 sm:h-48 object-cover"
-            onError={(e) => {
-              e.target.src = 'https://picsum.photos/seed/placeholder/800/600';
-            }}
+        <Input
+          id="close_bid_time"
+          label="Waktu Tutup Bid"
+          type="datetime-local"
+          value={formData.close_bid_time}
+          onChange={handleChange('close_bid_time')}
+        />
+      </div>
+
+      {/* Image Upload */}
+      <div>
+        <label className="block text-sm font-medium text-surface-300 mb-2">
+          Gambar Karya
+        </label>
+        <div
+          onClick={() => fileInputRef.current?.click()}
+          className="relative cursor-pointer rounded-xl border-2 border-dashed border-surface-600/50 hover:border-primary-500/50 transition-colors duration-200 p-6 text-center"
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageChange}
+            className="hidden"
+            id="image-upload"
           />
+          {imagePreview ? (
+            <div className="space-y-3">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-40 sm:h-48 object-cover rounded-lg"
+              />
+              <p className="text-xs text-surface-400">Klik untuk mengganti gambar</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <svg className="w-10 h-10 mx-auto text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="text-sm text-surface-400">Klik untuk upload gambar</p>
+              <p className="text-xs text-surface-500">JPG, PNG, WebP — Maks 10MB</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Actions */}
       <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-surface-600/30">

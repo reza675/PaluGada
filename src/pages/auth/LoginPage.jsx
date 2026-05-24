@@ -3,32 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Input from '../../components/common/Input';
 import Button from '../../components/common/Button';
-import { APP_NAME, APP_TAGLINE } from '../../utils/constants';
+import { APP_NAME, APP_TAGLINE, ROLES } from '../../utils/constants';
 
 export default function LoginPage() {
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '', role: 'artist' });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const result = await login(formData.email, formData.password, formData.role);
+    const result = await login(formData.email, formData.password);
     if (result.success) {
-      navigate(formData.role === 'artist' ? '/artist/dashboard' : '/curator/dashboard');
+      const role = result.user?.role;
+      if (role === ROLES.SENIMAN) {
+        navigate('/artist/dashboard');
+      } else if (role === ROLES.KURATOR) {
+        navigate('/curator/dashboard');
+      } else {
+        navigate('/artist/dashboard');
+      }
     } else {
       setError(result.error);
-    }
-  };
-
-  // Quick login buttons for demo
-  const quickLogin = async (email, role) => {
-    setFormData({ email, password: 'demo', role });
-    setError('');
-    const result = await login(email, 'demo', role);
-    if (result.success) {
-      navigate(role === 'artist' ? '/artist/dashboard' : '/curator/dashboard');
     }
   };
 
@@ -97,17 +94,6 @@ export default function LoginPage() {
               onChange={(e) => setFormData((p) => ({ ...p, password: e.target.value }))}
               required
             />
-            <Input
-              id="role"
-              label="Masuk Sebagai"
-              type="select"
-              value={formData.role}
-              onChange={(e) => setFormData((p) => ({ ...p, role: e.target.value }))}
-              options={[
-                { value: 'artist', label: '🎨 Seniman' },
-                { value: 'curator', label: '🔍 Kurator' },
-              ]}
-            />
             <Button type="submit" fullWidth loading={isLoading} size="lg">
               Masuk
             </Button>
@@ -119,19 +105,6 @@ export default function LoginPage() {
               Daftar Sekarang
             </Link>
           </p>
-
-          {/* Quick login demo */}
-          <div className="mt-8 pt-6 border-t border-surface-700/50">
-            <p className="text-xs text-surface-500 text-center mb-3">Demo Quick Login</p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="ghost" size="sm" onClick={() => quickLogin('budi@palugada.com', 'artist')}>
-                🎨 Budi (Seniman)
-              </Button>
-              <Button variant="ghost" size="sm" onClick={() => quickLogin('kurator@palugada.com', 'curator')}>
-                🔍 Rina (Kurator)
-              </Button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

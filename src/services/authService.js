@@ -1,57 +1,60 @@
-// Mock API service for authentication
-// This layer simulates REST API calls — replace with real fetch/axios calls later
-
-import usersData from '../data/users';
-
-let users = [...usersData];
+import { apiFetch, setTokens, clearTokens, getTokens } from '../utils/api';
 
 export const authService = {
-  /**
-   * POST /api/auth/login
-   */
-  async login(email, role) {
-    await new Promise((r) => setTimeout(r, 500));
-    const user = users.find((u) => u.email === email && u.role === role);
-    if (!user) throw new Error('User tidak ditemukan');
-    return { ...user };
+  async login({ email, password }) {
+    const data = await apiFetch('/user/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    });
+    setTokens(data.token, data.refreshToken);
+    return data;
   },
 
-  /**
-   * POST /api/auth/register
-   */
-  async register(userData) {
-    await new Promise((r) => setTimeout(r, 500));
-    if (users.some((u) => u.email === userData.email)) {
-      throw new Error('Email sudah terdaftar');
+  async register({ username, full_name, email, phone_number, password, role, alt_name }) {
+    const data = await apiFetch('/user/register', {
+      method: 'POST',
+      body: JSON.stringify({ username, full_name, email, phone_number, password, role, alt_name }),
+    });
+    return data;
+  },
+
+  async getProfile() {
+    const data = await apiFetch('/user/profile');
+    return data.user;
+  },
+
+  async updateProfile({ full_name, alt_name }) {
+    return apiFetch('/user/update/profile', {
+      method: 'PUT',
+      body: JSON.stringify({ full_name, alt_name }),
+    });
+  },
+
+  async updatePassword(password) {
+    return apiFetch('/user/update/password', {
+      method: 'PUT',
+      body: JSON.stringify({ password }),
+    });
+  },
+
+  async logout() {
+    const { refreshToken } = getTokens();
+    try {
+      if (refreshToken) {
+        await apiFetch('/user/logout', {
+          method: 'POST',
+          body: JSON.stringify({ refreshToken }),
+        });
+      }
+    } catch {
+    } finally {
+      clearTokens();
     }
-    const newUser = {
-      ...userData,
-      id: Math.max(...users.map((u) => u.id)) + 1,
-      role: 'artist',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    users.push(newUser);
-    return newUser;
   },
-
-  /**
-   * PUT /api/users/:id
-   */
-  async updateUser(id, data) {
-    await new Promise((r) => setTimeout(r, 500));
-    const idx = users.findIndex((u) => u.id === id);
-    if (idx === -1) throw new Error('User tidak ditemukan');
-    users[idx] = { ...users[idx], ...data, updated_at: new Date().toISOString() };
-    return users[idx];
-  },
-
-  /**
-   * DELETE /api/users/:id
-   */
-  async deleteUser(id) {
-    await new Promise((r) => setTimeout(r, 500));
-    users = users.filter((u) => u.id !== id);
-    return { success: true };
+  
+  async deleteAccount() {
+    const result = await apiFetch('/user/delete', { method: 'DELETE' });
+    clearTokens();
+    return result;
   },
 };

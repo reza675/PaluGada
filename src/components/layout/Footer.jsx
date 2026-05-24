@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 export default function Footer() {
   const location = useLocation();
 
-  // Don't show footer on auth pages
   if (['/login', '/register'].includes(location.pathname)) return null;
 
   return (

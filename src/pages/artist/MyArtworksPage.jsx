@@ -18,7 +18,7 @@ export default function MyArtworksPage() {
 
   const filtered = useMemo(() => {
     if (filter === 'all') return artworks;
-    return artworks.filter((a) => a.status === filter);
+    return artworks.filter((a) => a.verification_status === filter);
   }, [artworks, filter]);
 
   const handleEdit = (artwork) => {
@@ -36,9 +36,8 @@ export default function MyArtworksPage() {
 
   const filters = [
     { key: 'all', label: 'Semua' },
-    { key: ARTWORK_STATUS.PENDING, label: 'Pending' },
-    { key: ARTWORK_STATUS.VERIFIED, label: 'Verified' },
-    { key: ARTWORK_STATUS.REJECTED, label: 'Rejected' },
+    { key: ARTWORK_STATUS.UNVERIFIED, label: 'Menunggu' },
+    { key: ARTWORK_STATUS.VERIFIED, label: 'Terverifikasi' },
   ];
 
   return (
@@ -93,7 +92,7 @@ export default function MyArtworksPage() {
       >
         <div className="space-y-5">
           <p className="text-surface-300 leading-relaxed">
-            Apakah Anda yakin ingin menghapus <strong className="text-surface-100">&quot;{deleteModal.artwork?.title}&quot;</strong>? 
+            Apakah Anda yakin ingin menghapus <strong className="text-surface-100">&quot;{deleteModal.artwork?.nama_karya}&quot;</strong>? 
             Tindakan ini tidak dapat dibatalkan.
           </p>
           <div className="flex gap-3">

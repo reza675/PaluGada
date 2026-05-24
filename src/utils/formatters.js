@@ -1,5 +1,3 @@
-// Utility: formatters for currency, date, etc.
-
 /**
  * Format number to Indonesian Rupiah currency
  * @param {number} amount
@@ -27,6 +25,7 @@ export function formatDate(dateStr) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
+    timeZone: 'UTC'
   }).format(new Date(dateStr));
 }
 

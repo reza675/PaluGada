@@ -2,9 +2,9 @@ import StatusBadge from '../common/StatusBadge';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 
 export default function BidTable({ bids, artworks }) {
-  const getArtworkTitle = (artworkId) => {
-    const artwork = artworks.find((a) => a.id === artworkId);
-    return artwork?.title || 'Unknown';
+  const getArtworkName = (artworksId) => {
+    const artwork = artworks.find((a) => a.id === artworksId);
+    return artwork?.nama_karya || 'Unknown';
   };
 
   if (!bids.length) {
@@ -28,7 +28,6 @@ export default function BidTable({ bids, artworks }) {
           <thead>
             <tr className="bg-surface-800/50 border-b border-surface-600/30">
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-surface-400 uppercase tracking-wider">Karya</th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-surface-400 uppercase tracking-wider">Bidder</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-surface-400 uppercase tracking-wider">Jumlah Bid</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-surface-400 uppercase tracking-wider hidden md:table-cell">Waktu</th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-surface-400 uppercase tracking-wider">Status</th>
@@ -38,19 +37,13 @@ export default function BidTable({ bids, artworks }) {
             {bids.map((bid, index) => (
               <tr key={bid.id} className="hover:bg-surface-800/30 transition-colors animate-fade-in" style={{ animationDelay: `${index * 0.05}s` }}>
                 <td className="px-5 py-4">
-                  <span className="text-surface-200 font-medium">{getArtworkTitle(bid.artwork_id)}</span>
+                  <span className="text-surface-200 font-medium">{getArtworkName(bid.artworksId)}</span>
                 </td>
                 <td className="px-5 py-4">
-                  <div>
-                    <p className="text-surface-200">{bid.bidder_name}</p>
-                    <p className="text-xs text-surface-500 mt-0.5">{bid.bidder_email}</p>
-                  </div>
-                </td>
-                <td className="px-5 py-4">
-                  <span className="text-primary-400 font-semibold tabular-nums">{formatCurrency(bid.bid_amount)}</span>
+                  <span className="text-primary-400 font-semibold tabular-nums">{formatCurrency(bid.amount)}</span>
                 </td>
                 <td className="px-5 py-4 hidden md:table-cell">
-                  <span className="text-surface-400 text-xs">{formatDate(bid.bid_time)}</span>
+                  <span className="text-surface-400 text-xs">{formatDate(bid.timestamp)}</span>
                 </td>
                 <td className="px-5 py-4">
                   <StatusBadge status={bid.status} />
@@ -71,14 +64,13 @@ export default function BidTable({ bids, artworks }) {
           >
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-sm font-medium text-surface-100 truncate">{getArtworkTitle(bid.artwork_id)}</p>
-                <p className="text-xs text-surface-400 mt-0.5">{bid.bidder_name}</p>
+                <p className="text-sm font-medium text-surface-100 truncate">{getArtworkName(bid.artworksId)}</p>
               </div>
               <StatusBadge status={bid.status} />
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-primary-400 tabular-nums">{formatCurrency(bid.bid_amount)}</span>
-              <span className="text-xs text-surface-500">{formatDate(bid.bid_time)}</span>
+              <span className="text-sm font-semibold text-primary-400 tabular-nums">{formatCurrency(bid.amount)}</span>
+              <span className="text-xs text-surface-500">{formatDate(bid.timestamp)}</span>
             </div>
           </div>
         ))}

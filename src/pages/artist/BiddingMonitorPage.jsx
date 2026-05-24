@@ -17,11 +17,11 @@ export default function BiddingMonitorPage() {
   const isLoading = artLoading || bidLoading;
 
   const totalBidValue = useMemo(
-    () => bids.reduce((sum, b) => sum + b.bid_amount, 0),
+    () => bids.reduce((sum, b) => sum + b.amount, 0),
     [bids]
   );
   const highestBid = useMemo(
-    () => (bids.length ? Math.max(...bids.map((b) => b.bid_amount)) : 0),
+    () => (bids.length ? Math.max(...bids.map((b) => b.amount)) : 0),
     [bids]
   );
 

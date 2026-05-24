@@ -1,9 +1,15 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useContext } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { APP_NAME } from '../../utils/constants';
+import { APP_NAME, ROLES } from '../../utils/constants';
 import { SidebarContext } from '../../App';
 import Button from '../common/Button';
+
+const ROLE_LABELS = {
+  [ROLES.SENIMAN]: 'Seniman',
+  [ROLES.KURATOR]: 'Kurator',
+  [ROLES.KOLEKTOR]: 'Kolektor',
+};
 
 export default function Navbar() {
   const { currentUser, isAuthenticated, logout, isArtist, isCurator } = useAuth();
@@ -11,12 +17,11 @@ export default function Navbar() {
   const navigate = useNavigate();
   const sidebarCtx = useContext(SidebarContext);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
-  // Don't show navbar on auth pages
   if (['/login', '/register'].includes(location.pathname)) return null;
 
   return (
@@ -58,16 +63,14 @@ export default function Navbar() {
           {isAuthenticated && (
             <div className="flex items-center gap-3 sm:gap-4">
               <div className="hidden sm:flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-surface-800/50 border border-surface-600/30">
-                <img
-                  src={currentUser.avatar_url}
-                  alt={currentUser.full_name}
-                  className="w-7 h-7 rounded-lg object-cover ring-1 ring-surface-600/50"
-                />
+                <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center text-xs font-bold text-white ring-1 ring-surface-600/50">
+                  {currentUser?.full_name?.charAt(0)?.toUpperCase() || currentUser?.username?.charAt(0)?.toUpperCase() || '?'}
+                </div>
                 <div className="text-sm">
-                  <span className="text-surface-200 font-medium">{currentUser.full_name}</span>
+                  <span className="text-surface-200 font-medium">{currentUser?.full_name || currentUser?.username}</span>
                   <span className="text-surface-600 mx-1.5">·</span>
                   <span className="text-primary-400 text-xs font-semibold uppercase tracking-wide">
-                    {currentUser.role}
+                    {ROLE_LABELS[currentUser?.role] || currentUser?.role}
                   </span>
                 </div>
               </div>

@@ -1,6 +1,7 @@
 import { useState, createContext, useContext } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
+import { ROLES } from './utils/constants';
 
 // Layout
 import Navbar from './components/layout/Navbar';
@@ -22,17 +23,23 @@ import AccountSettingsPage from './pages/artist/AccountSettingsPage';
 // Curator Pages
 import CuratorDashboard from './pages/curator/CuratorDashboard';
 
+// Loading
+import { PageLoader } from './components/common/LoadingSpinner';
+
 // Sidebar context for mobile toggle
 export const SidebarContext = createContext();
 export const useSidebar = () => useContext(SidebarContext);
 
 // Protected Route wrapper
 function ProtectedRoute({ children, allowedRole }) {
-  const { isAuthenticated, currentUser } = useAuth();
+  const { isAuthenticated, currentUser, isLoading } = useAuth();
+
+  // Show loading while checking auth on initial mount
+  if (isLoading) return <PageLoader />;
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (allowedRole && currentUser?.role !== allowedRole) {
-    return <Navigate to={currentUser?.role === 'artist' ? '/artist/dashboard' : '/curator/dashboard'} replace />;
+    return <Navigate to={currentUser?.role === ROLES.SENIMAN ? '/artist/dashboard' : '/curator/dashboard'} replace />;
   }
   return children;
 }
@@ -66,11 +73,11 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Artist Routes */}
+      {/* Artist Routes (SENIMAN) */}
       <Route
         path="/artist/dashboard"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><ArtistDashboard /></DashboardLayout>
           </ProtectedRoute>
         }
@@ -78,7 +85,7 @@ export default function App() {
       <Route
         path="/artist/artworks"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><MyArtworksPage /></DashboardLayout>
           </ProtectedRoute>
         }
@@ -86,7 +93,7 @@ export default function App() {
       <Route
         path="/artist/artworks/create"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><CreateArtworkPage /></DashboardLayout>
           </ProtectedRoute>
         }
@@ -94,7 +101,7 @@ export default function App() {
       <Route
         path="/artist/artworks/:id/edit"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><EditArtworkPage /></DashboardLayout>
           </ProtectedRoute>
         }
@@ -102,7 +109,7 @@ export default function App() {
       <Route
         path="/artist/bidding"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><BiddingMonitorPage /></DashboardLayout>
           </ProtectedRoute>
         }
@@ -110,18 +117,26 @@ export default function App() {
       <Route
         path="/artist/account"
         element={
-          <ProtectedRoute allowedRole="artist">
+          <ProtectedRoute allowedRole={ROLES.SENIMAN}>
             <DashboardLayout><AccountSettingsPage /></DashboardLayout>
           </ProtectedRoute>
         }
       />
 
-      {/* Curator Routes */}
+      {/* Curator Routes (KURATOR) */}
       <Route
         path="/curator/dashboard"
         element={
-          <ProtectedRoute allowedRole="curator">
+          <ProtectedRoute allowedRole={ROLES.KURATOR}>
             <DashboardLayout><CuratorDashboard /></DashboardLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/curator/account"
+        element={
+          <ProtectedRoute allowedRole={ROLES.KURATOR}>
+            <DashboardLayout><AccountSettingsPage /></DashboardLayout>
           </ProtectedRoute>
         }
       />

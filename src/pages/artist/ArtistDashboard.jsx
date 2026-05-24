@@ -14,11 +14,11 @@ export default function ArtistDashboard() {
   const { bids, totalBids } = useBids(artworkIds);
 
   const stats = useMemo(() => {
-    const verified = artworks.filter((a) => a.status === 'verified').length;
-    const pending = artworks.filter((a) => a.status === 'pending').length;
-    const totalValue = artworks.reduce((sum, a) => sum + (a.starting_price || 0), 0);
-    const highestBid = bids.length ? Math.max(...bids.map((b) => b.bid_amount)) : 0;
-    return { total: artworks.length, verified, pending, totalValue, highestBid };
+    const verified = artworks.filter((a) => a.verification_status === 'VERIFIED').length;
+    const unverified = artworks.filter((a) => a.verification_status === 'UNVERIFIED').length;
+    const totalValue = artworks.reduce((sum, a) => sum + (a.min_bid_ammount || 0), 0);
+    const highestBid = bids.length ? Math.max(...bids.map((b) => b.amount)) : 0;
+    return { total: artworks.length, verified, unverified, totalValue, highestBid };
   }, [artworks, bids]);
 
   if (isLoading) return <PageLoader />;
@@ -26,7 +26,7 @@ export default function ArtistDashboard() {
   const statCards = [
     { label: 'Total Karya', value: stats.total, icon: '🎨', color: 'from-primary-600 to-primary-800' },
     { label: 'Terverifikasi', value: stats.verified, icon: '✅', color: 'from-emerald-600 to-emerald-800' },
-    { label: 'Menunggu Review', value: stats.pending, icon: '⏳', color: 'from-amber-600 to-amber-800' },
+    { label: 'Menunggu Review', value: stats.unverified, icon: '⏳', color: 'from-amber-600 to-amber-800' },
     { label: 'Total Bid Masuk', value: totalBids, icon: '📊', color: 'from-blue-600 to-blue-800' },
   ];
 
@@ -37,7 +37,7 @@ export default function ArtistDashboard() {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="relative z-10">
           <h1 className="text-2xl sm:text-3xl font-bold font-serif text-surface-50 mb-2">
-            Selamat Datang, {currentUser?.full_name} 👋
+            Selamat Datang, {currentUser?.full_name || currentUser?.username} 
           </h1>
           <p className="text-surface-400 max-w-lg text-sm sm:text-base">
             Kelola karya seni Anda, pantau proses verifikasi, dan monitor bidding dari kolektor.
@@ -98,17 +98,19 @@ export default function ArtistDashboard() {
           ) : (
             <div className="divide-y divide-surface-700/30">
               {bids.slice(0, 5).map((bid) => {
-                const artwork = artworks.find((a) => a.id === bid.artwork_id);
+                const artwork = artworks.find((a) => a.id === bid.artworksId);
                 return (
                   <div key={bid.id} className="flex items-center justify-between py-3.5 first:pt-0 last:pb-0">
                     <div className="min-w-0 mr-4">
-                      <p className="text-sm font-medium text-surface-100">{bid.bidder_name}</p>
+                      <p className="text-sm font-medium text-surface-100">
+                        {bid.bidBy?.username || `Kolektor #${(bid.bidById || bid.id).slice(-6)}`}
+                      </p>
                       <p className="text-xs text-surface-500 mt-0.5 truncate">
-                        pada &quot;{artwork?.title}&quot;
+                        pada &quot;{artwork?.nama_karya || 'Unknown'}&quot;
                       </p>
                     </div>
                     <p className="text-sm font-semibold text-primary-400 flex-shrink-0 tabular-nums">
-                      {formatCurrency(bid.bid_amount)}
+                      {formatCurrency(bid.amount)}
                     </p>
                   </div>
                 );

@@ -11,17 +11,18 @@ export default function CreateArtworkPage() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
-  const handleSubmit = async (formData) => {
+  const handleSubmit = async (formData, imageFile) => {
     setIsSubmitting(true);
-    const result = await createArtwork({
-      ...formData,
-      artist_id: currentUser.id,
-    });
+    setErrorMsg('');
+    const result = await createArtwork(formData, imageFile);
     setIsSubmitting(false);
     if (result.success) {
       setSuccessMsg('Karya berhasil diupload! Menunggu verifikasi kurator.');
       setTimeout(() => navigate('/artist/artworks'), 1500);
+    } else {
+      setErrorMsg(result.error || 'Gagal membuat karya.');
     }
   };
 
@@ -41,6 +42,15 @@ export default function CreateArtworkPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           {successMsg}
+        </div>
+      )}
+
+      {errorMsg && (
+        <div className="px-4 py-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm animate-fade-in flex items-center gap-2">
+          <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          {errorMsg}
         </div>
       )}
 

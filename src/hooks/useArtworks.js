@@ -1,24 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { artworkService } from '../services/artworkService';
 
-/**
- * Custom hook for artwork CRUD operations
- * Separates business logic from UI components
- */
 export function useArtworks(artistId = null) {
   const [artworks, setArtworks] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch artworks (all or by artist)
   const fetchArtworks = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const data = artistId
-        ? await artworkService.getByArtistId(artistId)
-        : await artworkService.getAll();
-      setArtworks(data);
+      const data = await artworkService.getAll();
+      const filtered = artistId
+        ? data.filter((a) => a.artistId === artistId)
+        : data;
+      setArtworks(filtered);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -31,39 +27,56 @@ export function useArtworks(artistId = null) {
   }, [fetchArtworks]);
 
   // Create artwork
-  const createArtwork = useCallback(async (artworkData) => {
+  const createArtwork = useCallback(async (artworkData, imageFile) => {
     setIsLoading(true);
     try {
       const newArtwork = await artworkService.create(artworkData);
-      setArtworks((prev) => [...prev, newArtwork]);
+      // If image file provided, upload it
+      if (imageFile) {
+        try {
+          await artworkService.uploadImage(newArtwork.id, imageFile);
+        } catch (imgErr) {
+          console.error('Image upload failed:', imgErr);
+        }
+      }
+
+      await fetchArtworks();
       setIsLoading(false);
       return { success: true, artwork: newArtwork };
     } catch (err) {
       setIsLoading(false);
       return { success: false, error: err.message };
     }
-  }, []);
+  }, [fetchArtworks]);
 
   // Update artwork
-  const updateArtwork = useCallback(async (id, data) => {
+  const updateArtwork = useCallback(async (id, data, imageFile) => {
     setIsLoading(true);
     try {
       const updated = await artworkService.update(id, data);
-      setArtworks((prev) => prev.map((a) => (a.id === Number(id) ? updated : a)));
+      // If new image file, upload it
+      if (imageFile) {
+        try {
+          await artworkService.uploadImage(id, imageFile);
+        } catch (imgErr) {
+          console.error('Image upload failed:', imgErr);
+        }
+      }
+      await fetchArtworks();
       setIsLoading(false);
       return { success: true, artwork: updated };
     } catch (err) {
       setIsLoading(false);
       return { success: false, error: err.message };
     }
-  }, []);
+  }, [fetchArtworks]);
 
   // Delete artwork
   const deleteArtwork = useCallback(async (id) => {
     setIsLoading(true);
     try {
       await artworkService.delete(id);
-      setArtworks((prev) => prev.filter((a) => a.id !== Number(id)));
+      setArtworks((prev) => prev.filter((a) => a.id !== id));
       setIsLoading(false);
       return { success: true };
     } catch (err) {
@@ -73,21 +86,21 @@ export function useArtworks(artistId = null) {
   }, []);
 
   // Verify artwork (curator)
-  const verifyArtwork = useCallback(async (id, curatorId) => {
+  const verifyArtwork = useCallback(async (id) => {
     try {
-      const updated = await artworkService.verify(id, curatorId);
-      setArtworks((prev) => prev.map((a) => (a.id === Number(id) ? updated : a)));
+      const updated = await artworkService.verify(id);
+      setArtworks((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
       return { success: true, artwork: updated };
     } catch (err) {
       return { success: false, error: err.message };
     }
   }, []);
 
-  // Unverify (reject) artwork (curator)
-  const unverifyArtwork = useCallback(async (id, curatorId) => {
+  // Unverify artwork (curator)
+  const unverifyArtwork = useCallback(async (id) => {
     try {
-      const updated = await artworkService.unverify(id, curatorId);
-      setArtworks((prev) => prev.map((a) => (a.id === Number(id) ? updated : a)));
+      const updated = await artworkService.unverify(id);
+      setArtworks((prev) => prev.map((a) => (a.id === id ? { ...a, ...updated } : a)));
       return { success: true, artwork: updated };
     } catch (err) {
       return { success: false, error: err.message };
