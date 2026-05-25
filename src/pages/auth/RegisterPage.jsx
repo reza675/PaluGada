@@ -127,7 +127,6 @@ export default function RegisterPage() {
               options={[
                 { value: ROLES.SENIMAN, label: '🎨 Seniman' },
                 { value: ROLES.KURATOR, label: '🔍 Kurator' },
-                { value: ROLES.KOLEKTOR, label: '🖼️ Kolektor' },
               ]}
             />
             <Input id="alt_name" label="Nama Alias (opsional)" placeholder="Nama samaran untuk karya seni" value={formData.alt_name} onChange={handleChange('alt_name')} />
